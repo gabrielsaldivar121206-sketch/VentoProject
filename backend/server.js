@@ -20,7 +20,15 @@ app.use(express.json({ limit: '5mb' })); // face descriptors son arrays grandes
    FIREBASE ADMIN (base de datos en la nube)
    Todo el acceso a Firestore pasa por aquí (Node.js)
 ══════════════════════════════════════════════════ */
-const serviceAccount = require('./serviceAccountKey.json');
+let serviceAccount;
+if (process.env.FIREBASE_CREDENTIALS) {
+    // En producción (Render), leemos el JSON desde una variable de entorno
+    serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+} else {
+    // En local, usamos el archivo
+    serviceAccount = require('./serviceAccountKey.json');
+}
+
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 
