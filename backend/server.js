@@ -5,6 +5,7 @@ const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 const admin    = require('firebase-admin');
 const { OAuth2Client } = require('google-auth-library');
+const path     = require('path');
 
 const app    = express();
 const PORT   = process.env.PORT || 5000;
@@ -436,6 +437,18 @@ app.get('/api/admins', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: 'Error al obtener admins' });
     }
+});
+
+/* ══════════════════════════════════════════════════
+   PRODUCCIÓN: Servir Frontend Estático
+══════════════════════════════════════════════════ */
+// Sirve los archivos estáticos de React/Vite desde la carpeta frontend/dist
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendDistPath));
+
+// Cualquier otra ruta no capturada por la API es redirigida al index.html de React
+app.get(/^(.*)$/, (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
 /* ══════════════════════════════════════════════════
