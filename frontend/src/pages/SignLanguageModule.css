@@ -276,3 +276,84 @@
   .sl-modes-grid{grid-template-columns:1fr;}
   .sl-hero-stats{gap:12px;}
 }
+
+/* ── Mobile ≤ 600px ─────────────────────────────────────────── */
+@media(max-width:600px){
+  /* Home */
+  .sl-home-inner{padding:16px 14px 40px;}
+  .sl-home-header{margin-bottom:24px;flex-wrap:wrap;gap:8px;}
+  .sl-home-header > div:last-child{display:none;}
+  .sl-brand-name{font-size:28px;}
+  .sl-brand-icon{font-size:32px;}
+  .sl-tagline{font-size:14px;}
+  .sl-hero{margin-bottom:28px;}
+  .sl-hero-floating-hands{gap:8px;}
+  .sl-float-hand{font-size:24px;padding:8px 12px;border-radius:12px;}
+  .sl-hero-stats{flex-direction:column;gap:8px;align-items:stretch;}
+  .sl-hero-stat{flex-direction:row;justify-content:space-between;padding:10px 16px;border-radius:12px;}
+  .sl-hero-stat-value{font-size:18px;}
+  .sl-section-title{font-size:12px;margin-bottom:14px;}
+  .sl-modes-grid{grid-template-columns:1fr;gap:14px;}
+  .sl-mode-card{padding:20px;border-radius:18px;}
+  .sl-mc-icon-wrap{width:44px;height:44px;font-size:22px;border-radius:14px;margin-bottom:12px;}
+  .sl-mc-title{font-size:18px;}
+  .sl-mc-desc{font-size:12px;margin-bottom:14px;}
+  .sl-mc-letters{gap:4px;}
+  .sl-letter-chip{padding:3px 8px;font-size:11px;}
+  .sl-mc-footer{padding-top:10px;}
+
+  /* Detector */
+  .sl-layout{padding:12px 14px;gap:10px;}
+  .sl-header{flex-direction:column;align-items:flex-start;gap:8px;}
+  .sl-header-title{font-size:18px;}
+  .sl-status-pill{font-size:11px;padding:6px 12px;}
+  .sl-main-grid{grid-template-columns:1fr;grid-template-rows:auto auto;gap:12px;}
+  .sl-camera-section{min-height:0;}
+  .sl-vision-box{height:55vw;min-height:200px;}
+  .sl-side-panel{flex-direction:column;overflow-x:visible;overflow-y:visible;gap:10px;}
+  .sl-card{min-width:auto;padding:14px;border-radius:16px;}
+  .sl-big-letter{font-size:48px;}
+  .sl-conf-track{margin:8px 0 4px;}
+  .sl-legend-row{font-size:12px;}
+  .sl-history-text{font-size:18px;letter-spacing:4px;}
+
+  /* Learn mode */
+  .sl-learn{height:auto;min-height:100dvh;overflow-y:auto;}
+  .sl-learn-header{padding:10px 14px;gap:10px;flex-wrap:wrap;}
+  .sl-learn-title{font-size:16px;}
+  .sl-learn-topstats{gap:6px;}
+  .sl-topstat{font-size:11px;padding:4px 10px;}
+  .sl-progress-pills-wrap{padding:6px 14px;}
+  .sl-pp{width:24px;height:24px;font-size:9px;border-radius:6px;}
+  .sl-learn-body{grid-template-columns:1fr;height:auto;overflow-y:visible;padding:12px 14px;gap:12px;}
+  .sl-learn-cam-col{min-height:auto;}
+  .sl-vision-box{height:55vw;min-height:200px;}
+  .sl-detect-bubble{font-size:36px;padding:8px 18px;border-radius:14px;bottom:12px;}
+  .sl-guide-col{gap:10px;}
+  .sl-guide-letter-card{padding:14px;}
+  .sl-guide-big-letter{font-size:52px;}
+  .sl-guide-counter{font-size:11px;}
+  .sl-guide-hint{font-size:12px;line-height:1.6;}
+  .sl-finger-chip{padding:4px 9px;font-size:11px;}
+  .sl-next-btn{padding:12px;font-size:14px;border-radius:12px;}
+  .sl-skip-btn{padding:8px;font-size:12px;}
+  .sl-mini-map{gap:3px;}
+  .sl-mm{width:22px;height:22px;font-size:9px;border-radius:5px;}
+
+  /* Done screen */
+  .sl-done-inner{padding:24px 16px;}
+  .sl-done-emoji{font-size:52px;}
+  .sl-done-title{font-size:28px;}
+  .sl-done-sub{font-size:14px;}
+  .sl-done-stats{gap:10px;}
+  .sl-done-stat{padding:10px 16px;border-radius:12px;}
+  .sl-done-stat-val{font-size:18px;}
+  .sl-done-chips{gap:6px;}
+  .sl-done-chip{padding:5px 12px;font-size:12px;border-radius:8px;}
+  .sl-done-actions{flex-direction:column;width:100%;}
+  .sl-done-btn{width:100%;padding:12px 24px;font-size:14px;border-radius:12px;}
+
+  /* XP Popup */
+  .sl-xp-popup{top:60px;padding:10px 20px;border-radius:12px;}
+  .sl-xp-popup-val{font-size:22px;}
+}

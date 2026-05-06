@@ -130,23 +130,34 @@
 
 /* ═══ GENERIC MODULE — Course header ═══════════════════════════════════════ */
 .course-module-header {
-  display: flex; align-items: center; gap: 1rem;
-  padding: 1.25rem 1.5rem; border-radius: 20px;
-  border: 1px solid; margin-bottom: 2rem;
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 2rem 2.5rem; border-radius: 24px;
+  border: 1px solid; margin-bottom: 2.5rem;
   animation: fadeInUp 0.4s ease both;
+  position: relative; overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+.course-module-header::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--course-color, #58cc02);
 }
 .cmh-icon {
-  width: 56px; height: 56px; border-radius: 16px; flex-shrink: 0;
+  width: 72px; height: 72px; border-radius: 20px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 2rem;
+  font-size: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  transition: transform 0.3s;
 }
+.cmh-icon:hover { transform: scale(1.08) rotate(5deg); }
 .cmh-info { flex: 1; }
-.cmh-title { font-size: 1.2rem; font-weight: 900; }
-.cmh-sub { font-size: 0.78rem; font-weight: 600; color: #777; margin-top: 0.15rem; }
+.cmh-title { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.02em; }
+.cmh-sub { font-size: 0.95rem; font-weight: 600; color: #888; margin-top: 0.3rem; }
 .cmh-xp-badge {
-  padding: 0.3rem 0.8rem; border-radius: 999px;
-  font-size: 0.8rem; font-weight: 900; border: 1px solid;
+  padding: 0.5rem 1.2rem; border-radius: 999px;
+  font-size: 1rem; font-weight: 900; border: 1px solid;
   white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 /* wider dashboard */
@@ -159,29 +170,88 @@
 
 /* ─── Practice Mode Button ──────────────────────────────────── */
 .practice-mode-btn {
-  display: flex; align-items: center; gap: 0.8rem;
-  width: 100%; padding: 1rem 1.4rem;
+  display: flex; align-items: center; gap: 1rem;
+  width: 100%; padding: 1.25rem 1.75rem;
   background: linear-gradient(135deg, rgba(var(--pc-rgb,255,107,157),0.12), rgba(var(--pc-rgb,255,107,157),0.05));
-  border: 1px solid rgba(255,255,255,0.1);
-  border-left: 3px solid var(--pc, #ff6b9d);
-  border-radius: 16px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-left: 4px solid var(--pc, #ff6b9d);
+  border-radius: 20px; cursor: pointer;
   font-family: var(--font-main, system-ui);
-  color: #fff; margin-bottom: 1.5rem;
-  transition: all 0.2s;
+  color: #fff; margin-bottom: 2rem;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
   animation: fadeInUp 0.4s 0.2s ease both;
 }
 .practice-mode-btn:hover {
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
   border-color: var(--pc, #ff6b9d);
-  transform: translateX(4px);
+  transform: translateX(6px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
-.pmb-icon  { font-size: 1.6rem; }
-.pmb-label { flex: 1; font-size: 0.95rem; font-weight: 900; text-align: left; }
-.pmb-arrow { font-size: 1.1rem; color: var(--pc, #ff6b9d); transition: transform 0.2s; }
-.practice-mode-btn:hover .pmb-arrow { transform: translateX(6px); }
+.pmb-icon  { font-size: 2rem; }
+.pmb-label { flex: 1; font-size: 1.1rem; font-weight: 900; text-align: left; }
+.pmb-arrow { font-size: 1.3rem; color: var(--pc, #ff6b9d); transition: transform 0.3s; }
+.practice-mode-btn:hover .pmb-arrow { transform: translateX(8px); }
 
 /* ─── Practice Mode View ────────────────────────────────────── */
 .practice-mode-view {
   padding: 1.5rem 0;
   animation: fadeInUp 0.35s ease both;
 }
+
+/* ═══ MOBILE RESPONSIVE — All Course Modules ═══════════════════════════════ */
+@media (max-width: 768px) {
+  /* Course cards on dashboard */
+  .courses-grid-v3 { grid-template-columns: 1fr; gap: 1.25rem; }
+  .course-card-v3 { min-height: 320px; }
+  .ccv3-banner { height: 110px; }
+  .ccv3-emoji-ring { width: 56px; height: 56px; font-size: 1.8rem; border-radius: 16px; }
+  .ccv3-name { font-size: 1.05rem; }
+  .ccv3-content { padding: 0.5rem 1.2rem 1.2rem; }
+
+  /* Course module header */
+  .course-module-header {
+    flex-direction: column; text-align: center;
+    gap: 1rem; padding: 1.5rem 1.25rem;
+  }
+  .cmh-icon { width: 64px; height: 64px; font-size: 2.2rem; }
+  .cmh-title { font-size: 1.4rem; }
+  .cmh-sub { font-size: 0.85rem; }
+  .cmh-xp-badge { font-size: 0.9rem; }
+
+  /* Practice button */
+  .practice-mode-btn { padding: 1rem 1.25rem; gap: 0.75rem; }
+  .pmb-icon { font-size: 1.6rem; }
+  .pmb-label { font-size: 0.95rem; }
+
+  /* TopBar */
+  .eng-topbar-inner { gap: 0.5rem; }
+  .eng-back-btn { font-size: 0.8rem; padding: 0.35rem 0.7rem; }
+  .eng-topbar-title { font-size: 0.8rem; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .eng-stat { font-size: 0.75rem !important; padding: 0.2rem 0.5rem !important; }
+  .eng-hearts span { font-size: 0.7rem; }
+
+  /* Exercise cards */
+  .exercise-card { border-radius: 20px; }
+  .ex-inner { padding: 1.25rem; }
+  .exercise-question { font-size: 1.1rem; }
+  .options-grid-v2 { gap: 0.6rem; }
+  .option-btn-v2 { padding: 0.9rem 1rem; border-radius: 14px; }
+  .opt-text { font-size: 0.9rem; }
+
+  /* Lesson complete */
+  .lesson-complete-card { padding: 2rem 1.5rem; }
+  .complete-title { font-size: 1.4rem; }
+  .complete-stats-row { gap: 1rem; }
+  .complete-stat-value { font-size: 1.4rem; }
+}
+
+@media (max-width: 480px) {
+  .eng-topbar-stats { gap: 0.3rem; }
+  .eng-hearts { display: none; }
+  .exercise-question { font-size: 1rem; }
+  .btn-listen { width: 65px; height: 65px; font-size: 1.8rem; }
+  .exercise-input { font-size: 0.9rem; padding: 0.8rem; }
+  .complete-buttons { gap: 0.6rem; }
+  .btn-lg { font-size: 0.95rem; padding: 0.9rem; }
+}
+

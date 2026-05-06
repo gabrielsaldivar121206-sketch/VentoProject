@@ -449,40 +449,38 @@ const GenericCourseModule = ({ courseId, courseName, courseColor, courseEmoji, l
 
             {lessons.units.map((unit, ui) => {
               const color = UNIT_COLORS[ui % UNIT_COLORS.length];
+              const unitCompleted = unit.lessons.filter(l => completedLessons.includes(l.id)).length;
+              const unitPct = Math.round((unitCompleted / unit.lessons.length) * 100);
               return (
-                <div key={unit.id} className="unit-block" style={{ animationDelay:`${ui*0.12}s` }}>
+                <div key={unit.id} className="unit-block" style={{ animationDelay:`${ui*0.12}s`, '--unit-color': color }}>
                   <div className="unit-header-card" style={{ '--unit-color': color }}>
-                    <div className="unit-icon-wrap" style={{ background:`${color}18`, borderColor:`${color}25` }}>{unit.icon}</div>
+                    <div className="unit-icon-wrap" style={{ background:`${color}22`, borderColor:`${color}35` }}>{unit.icon}</div>
                     <div className="unit-info">
                       <h3 className="unit-title">{unit.titleEs || unit.title}</h3>
                       <p className="unit-subtitle">{unit.description}</p>
                     </div>
-                    <span className="unit-lesson-count">{unit.lessons.length} lecciones</span>
+                    <div className="unit-right">
+                      <span className="unit-lesson-count">{unitCompleted}/{unit.lessons.length}</span>
+                      <div className="unit-progress-mini">
+                        <div className="unit-progress-fill" style={{ width: `${unitPct}%`, background: color }} />
+                      </div>
+                    </div>
                   </div>
-                  <div className="lessons-path">
+                  <div className="lessons-grid">
                     {unit.lessons.map((lesson, li) => {
                       const isCompleted = completedLessons.includes(lesson.id);
-                      const isNext = !isCompleted && (li === 0 || completedLessons.includes(unit.lessons[li-1]?.id));
                       return (
-                        <React.Fragment key={lesson.id}>
-                          {li > 0 && (
-                            <div className="lesson-connector">
-                              {[0,1,2].map(d => <span key={d} className="connector-dot" style={{ background: isCompleted ? color : undefined }} />)}
-                            </div>
-                          )}
-                          <div className={`lesson-node ${isNext?'is-next':''}`}
-                            onClick={() => startLesson(lesson)}
-                            onMouseEnter={() => sounds.hover()}>
-                            <div className={`lesson-node-circle ${isCompleted?'completed':''} ${isNext?'next-pulse':''}`}
-                              style={!isCompleted ? { background:`linear-gradient(135deg,${color},${color}cc)`, boxShadow:`0 6px 0 ${color}66,0 0 25px ${color}18` } : {}}>
-                              {isCompleted ? '⭐' : isNext ? '▶' : unit.icon}
-                              {isCompleted && <span className="node-check">✓</span>}
-                            </div>
-                            <span className="lesson-node-label">{lesson.titleEs || lesson.title}</span>
-                            <span className="lesson-node-xp">+{lesson.xpReward} XP</span>
-                            {isNext && <span className="node-start-badge">¡Empezar!</span>}
-                          </div>
-                        </React.Fragment>
+                        <div key={lesson.id} className={`lesson-card-v2 ${isCompleted ? 'done' : ''}`}
+                          style={{ '--lc': color, animationDelay: `${(ui * 0.12) + (li * 0.06)}s` }}
+                          onClick={() => startLesson(lesson)}
+                          onMouseEnter={() => sounds.hover()}>
+                          <div className="lc-top-stripe" />
+                          <div className="lc-icon">{isCompleted ? '⭐' : unit.icon}</div>
+                          <span className="lc-title">{lesson.titleEs || lesson.title}</span>
+                          <span className="lc-xp">+{lesson.xpReward} XP</span>
+                          {isCompleted && <span className="lc-check">✓</span>}
+                          {!isCompleted && <span className="lc-play">▶</span>}
+                        </div>
                       );
                     })}
                   </div>
