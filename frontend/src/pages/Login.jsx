@@ -73,9 +73,12 @@ const Login = () => {
   const googleBtnRef = useRef(null);
 
   /* ══════════════════════════════════════════════
-     CARGAR MODELOS FACE-API + WARMUP
+     CARGAR MODELOS FACE-API + WARMUP (LAZY LOAD)
   ══════════════════════════════════════════════ */
   useEffect(() => {
+    if (activeTab !== 'faceid') return; // Carga perezosa
+    if (modelsLoaded) return;
+    
     let cancelled = false;
     (async () => {
       try {
@@ -95,7 +98,7 @@ const Login = () => {
       } catch (err) { console.error('Error modelos:', err); }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [activeTab, modelsLoaded]);
 
   /* ══════════════════════════════════════════════
      GOOGLE IDENTITY SERVICES
@@ -356,18 +359,8 @@ const Login = () => {
       <div className="login-right">
 
         {/* Theme toggle */}
-        <button className="theme-toggle" onClick={toggleTheme} title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}>
-          <AnimatePresence mode="wait">
-            {theme === 'light' ? (
-              <motion.div key="moon" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                <Moon size={20} />
-              </motion.div>
-            ) : (
-              <motion.div key="sun" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                <Sun size={20} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <button className="theme-toggle" onClick={toggleTheme} aria-label={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}>
+          {theme === 'light' ? <><Moon size={16} /> <span>Oscuro</span></> : <><Sun size={16} /> <span>Claro</span></>}
         </button>
 
         {/* Face scanners (overlay) */}
@@ -427,7 +420,7 @@ const Login = () => {
                 <AnimatePresence mode="wait">
                   {activeTab === 'credentials' && (
                     <motion.div key="cred-tab"
-                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.15 }}
                     >
                       <form className="login-form" onSubmit={handleLogin}>
@@ -445,11 +438,20 @@ const Login = () => {
                             <Lock size={16} className="input-icon" />
                             <input className="field has-eye" type={showPassword ? 'text' : 'password'} placeholder="••••••••"
                               value={password} onChange={e => setPassword(e.target.value)} required />
-                            <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)}>
+                            <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)} aria-label="Mostrar/ocultar contraseña">
                               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                           </div>
                         </div>
+
+                        <div className="form-options">
+                          <label className="checkbox-wrap">
+                            <input type="checkbox" />
+                            <span>Recordarme</span>
+                          </label>
+                          <button type="button" className="forgot-link" onClick={e => e.preventDefault()}>¿Olvidaste tu contraseña?</button>
+                        </div>
+
                         <button type="submit" className="btn btn-primary" disabled={loading}>
                           {loading ? <Loader2 size={18} className="spin" /> : <ArrowRight size={18} />}
                           {loading ? 'Verificando…' : 'Iniciar sesión'}
@@ -485,26 +487,35 @@ const Login = () => {
 
                   {activeTab === 'faceid' && (
                     <motion.div key="face-tab"
-                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.15 }}
                     >
                       <div className="faceid-section">
-                        <span className="faceid-label"><ScanFace size={14} /> Reconocimiento Facial</span>
-                        {!modelsLoaded && (
-                          <span className="models-badge">
-                            <Loader2 size={11} className="spin" /> Cargando modelos IA…
-                          </span>
+                        {!modelsLoaded ? (
+                          <div className="faceid-loading">
+                            <div className="faceid-scanner-pulse">
+                              <ScanFace size={32} className="pulse-icon" />
+                            </div>
+                            <span className="faceid-loading-text">
+                              <Loader2 size={14} className="spin" /> Inicializando motor de IA...
+                            </span>
+                            <p className="faceid-loading-sub">Preparando reconocimiento facial seguro</p>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="faceid-label"><ScanFace size={14} /> Reconocimiento Facial Listo</span>
+                            <div className="faceid-buttons">
+                              <button className="btn btn-purple pulse-ready" disabled={loading}
+                                onClick={() => setMode('face-login')}>
+                                <ScanFace size={16} /> Entrar
+                              </button>
+                              <button className="btn btn-outline" disabled={loading}
+                                onClick={() => setMode('face-register')}>
+                                <UserPlus size={16} /> Registrar
+                              </button>
+                            </div>
+                          </>
                         )}
-                        <div className="faceid-buttons">
-                          <button className="btn btn-purple" disabled={!modelsLoaded || loading}
-                            onClick={() => setMode('face-login')}>
-                            <ScanFace size={16} /> Entrar
-                          </button>
-                          <button className="btn btn-outline" disabled={!modelsLoaded || loading}
-                            onClick={() => setMode('face-register')}>
-                            <UserPlus size={16} /> Registrar
-                          </button>
-                        </div>
                       </div>
                     </motion.div>
                   )}
