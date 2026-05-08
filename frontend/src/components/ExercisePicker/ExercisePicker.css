@@ -1,0 +1,275 @@
+/* ExercisePicker — Compact, centered, premium cards */
+
+.exercise-picker {
+  max-width: 860px;
+  margin: 0 auto;
+  animation: fadeInUp .5s ease both;
+  padding-bottom: 3rem;
+}
+
+/* Hero header */
+.ep-hero {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.ep-hero-title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.02em;
+}
+.ep-hero-sub {
+  font-size: 1rem;
+  color: #888;
+  font-weight: 600;
+}
+
+/* Progress bar */
+.ep-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0.8rem 1.25rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.ep-progress-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.ep-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #1cb0f6, #ce82ff);
+  background-size: 200% 100%;
+  animation: shimmerGrad 3s ease infinite;
+  transition: width .7s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 0 12px rgba(28,176,246,0.4);
+}
+@keyframes shimmerGrad {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.ep-progress-label {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #aaa;
+  white-space: nowrap;
+}
+
+/* Grid — 3 columns on desktop, 2 on tablet, 1 on phone */
+.ep-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+@media (max-width: 700px) {
+  .ep-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 440px) {
+  .ep-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+}
+
+/* Card */
+.ep-card {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: center;
+  outline: none;
+  animation: cardSlideUp .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes cardSlideUp {
+  0% { opacity: 0; transform: translateY(20px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ep-card-inner {
+  position: relative;
+  padding: 1.25rem 1rem;
+  border-radius: 20px;
+  background: linear-gradient(165deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 2px solid rgba(255,255,255,0.07);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.35);
+  transition: all .25s cubic-bezier(.25,.8,.25,1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ep-card-glow {
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  height: 80%;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hover */
+.ep-card:not(.completed):hover .ep-card-inner {
+  transform: translateY(-5px);
+  border-color: var(--ex-color);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 12px 0 rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.04);
+}
+.ep-card:not(.completed):hover .ep-card-glow { opacity: 1; }
+.ep-card:not(.completed):active .ep-card-inner {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.45);
+}
+.ep-card:not(.completed):hover .ep-icon-wrap {
+  border-color: var(--ex-color);
+  box-shadow: 0 6px 18px var(--ex-color);
+  transform: scale(1.1);
+}
+.ep-card:not(.completed):hover .ep-play-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Completed */
+.ep-card.completed .ep-card-inner {
+  background: rgba(88,204,2,0.05);
+  border-color: rgba(88,204,2,0.2);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.25);
+}
+.ep-card.completed:hover .ep-card-inner {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 rgba(0,0,0,0.25);
+}
+
+/* Current */
+.ep-card.current .ep-card-inner {
+  border-color: rgba(28,176,246,0.4);
+  background: rgba(28,176,246,0.06);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.35), 0 0 25px rgba(28,176,246,0.12);
+  animation: currentGlow 2.5s ease-in-out infinite;
+}
+@keyframes currentGlow {
+  0%, 100% { box-shadow: 0 6px 0 rgba(0,0,0,0.35), 0 0 15px rgba(28,176,246,0.1); }
+  50% { box-shadow: 0 6px 0 rgba(0,0,0,0.35), 0 0 35px rgba(28,176,246,0.2); }
+}
+
+/* Top row */
+.ep-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.25rem;
+  position: relative;
+  z-index: 1;
+}
+.ep-number {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #666;
+  letter-spacing: 0.04em;
+  background: rgba(255,255,255,0.05);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+.ep-check {
+  width: 24px; height: 24px;
+  background: linear-gradient(135deg, #58cc02, #45a300);
+  color: #fff; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 900;
+  box-shadow: 0 3px 0 #3a8a00;
+}
+.ep-current-dot {
+  width: 10px; height: 10px;
+  background: #1cb0f6;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(28,176,246,0.5);
+  animation: pulse 1.5s ease infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* Icon */
+.ep-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255,255,255,0.1);
+  position: relative;
+  z-index: 1;
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+}
+.ep-icon {
+  font-size: 1.8rem;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.35));
+}
+
+/* Type label */
+.ep-type {
+  font-size: 0.88rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #ccc;
+  position: relative;
+  z-index: 1;
+}
+.ep-xp {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #ff9600;
+  position: relative;
+  z-index: 1;
+}
+
+/* Play hint */
+.ep-play-hint {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--ex-color);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all .25s;
+  position: relative;
+  z-index: 1;
+  margin-top: 0.25rem;
+}
+
+/* Done overlay */
+.ep-done-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(88,204,2,0.04), transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .ep-hero-title { font-size: 1.6rem; }
+  .ep-card-inner { padding: 1rem 0.85rem; gap: 0.4rem; }
+  .ep-icon-wrap { width: 46px; height: 46px; }
+  .ep-icon { font-size: 1.5rem; }
+  .ep-type { font-size: 0.8rem; }
+}
