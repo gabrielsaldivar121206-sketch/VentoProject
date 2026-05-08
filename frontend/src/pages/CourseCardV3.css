@@ -85,18 +85,18 @@
   flex: 1; display: flex; flex-direction: column; gap: 0.6rem;
   position: relative; z-index: 1;
 }
-.ccv3-name { font-size: 1.15rem; font-weight: 900; color: #fff; }
+.ccv3-name { font-size: 1.15rem; font-weight: 900; color: var(--text); }
 .ccv3-subtitle { font-size: 0.82rem; font-weight: 700; color: var(--cc); opacity: 0.85; }
-.ccv3-desc { font-size: 0.8rem; color: #888; font-weight: 600; line-height: 1.4; }
+.ccv3-desc { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; line-height: 1.4; }
 .ccv3-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 .ccv3-stats { display: flex; gap: 1rem; }
-.ccv3-stat { font-size: 0.73rem; font-weight: 700; color: #666; }
+.ccv3-stat { font-size: 0.73rem; font-weight: 700; color: var(--text-muted); }
 
 /* Progress */
 .ccv3-progress { margin-top: auto; }
 .ccv3-prog-info {
   display: flex; justify-content: space-between;
-  font-size: 0.73rem; font-weight: 800; color: #888; margin-bottom: 0.4rem;
+  font-size: 0.73rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 0.4rem;
 }
 .ccv3-prog-bar {
   height: 7px; background: rgba(255,255,255,0.07);
@@ -132,32 +132,33 @@
 .course-module-header {
   display: flex; align-items: center; gap: 1.5rem;
   padding: 2rem 2.5rem; border-radius: 24px;
-  border: 1px solid; margin-bottom: 2.5rem;
+  border: 1px solid var(--border); margin-bottom: 2.5rem;
   animation: fadeInUp 0.4s ease both;
   position: relative; overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+  background: var(--bg-card);
 }
 .course-module-header::before {
   content: ''; position: absolute; top: 0; left: 0;
   width: 4px; height: 100%;
-  background: var(--course-color, #58cc02);
+  background: var(--course-color, var(--green));
 }
 .cmh-icon {
   width: 72px; height: 72px; border-radius: 20px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 2.5rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   transition: transform 0.3s;
 }
 .cmh-icon:hover { transform: scale(1.08) rotate(5deg); }
 .cmh-info { flex: 1; }
-.cmh-title { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.02em; }
-.cmh-sub { font-size: 0.95rem; font-weight: 600; color: #888; margin-top: 0.3rem; }
+.cmh-title { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.02em; color: var(--text); }
+.cmh-sub { font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); margin-top: 0.3rem; }
 .cmh-xp-badge {
   padding: 0.5rem 1.2rem; border-radius: 999px;
   font-size: 1rem; font-weight: 900; border: 1px solid;
-  white-space: nowrap;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  white-space: nowrap; color: var(--text);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 /* wider dashboard */

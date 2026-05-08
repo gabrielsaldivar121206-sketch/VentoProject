@@ -302,6 +302,14 @@ const FaceScanner = ({ mode = 'login', modelsLoaded, onResult, onCancel, speak }
             <video ref={videoRef} autoPlay muted playsInline style={S.video} />
             <canvas ref={canvasRef} style={S.canvas} />
 
+            {/* Guía Visual (Overlay) */}
+            <div style={{ ...S.guideOverlay, opacity: faceDetected ? 0 : 1 }}>
+              <svg viewBox="0 0 100 100" style={{ width: '80%', height: '80%', opacity: 0.6 }}>
+                <ellipse cx="50" cy="50" rx="35" ry="45" fill="none" stroke="#fff" strokeWidth="2" strokeDasharray="4 4" />
+                <path d="M 50 15 L 50 25 M 50 85 L 50 75 M 15 50 L 25 50 M 85 50 L 75 50" stroke="#fff" strokeWidth="2" />
+              </svg>
+            </div>
+
             {/* Línea de escaneo buscando */}
             {camStatus === 'BUSCANDO' && (
               <motion.div
@@ -478,6 +486,12 @@ const S = {
     zIndex: 5, pointerEvents: 'none',
     objectFit: 'cover',
     transform: 'scaleX(-1)',
+  },
+  guideOverlay: {
+    position: 'absolute', inset: 0,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    zIndex: 6, pointerEvents: 'none',
+    transition: 'opacity 0.4s ease',
   },
   scanLine: {
     position: 'absolute', left: 0, right: 0,

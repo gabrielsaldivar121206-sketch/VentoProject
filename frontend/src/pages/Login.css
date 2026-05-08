@@ -379,12 +379,17 @@ body { font-family: var(--font); }
 
 /* ── Alerts ── */
 .alert {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
   padding: 10px 14px; border-radius: 12px;
   font-weight: 700; font-size: 0.82rem; margin-bottom: 12px;
   border: 1.5px solid;
   transition: background 0.4s, color 0.4s;
 }
+.alert-close {
+  background: none; border: none; color: inherit; opacity: 0.5; cursor: pointer;
+  font-size: 1.1rem; padding: 0 4px; display: flex; transition: opacity 0.2s;
+}
+.alert-close:hover { opacity: 1; }
 .alert-success {
   background: rgba(0,184,148,0.12); color: var(--green);
   border-color: var(--green);
@@ -444,6 +449,42 @@ input.field:focus {
   border-color: var(--border-focus);
   background: var(--bg-card);
   box-shadow: 0 0 0 3px rgba(108,92,231,0.12);
+}
+
+/* Hide native browser password reveal icons */
+input.field[type="password"]::-ms-reveal,
+input.field[type="password"]::-ms-clear,
+input.field[type="password"]::-webkit-contacts-auto-fill-button,
+input.field[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
+.valid-input .input-icon { color: var(--green) !important; }
+.valid-input .field { border-color: var(--green) !important; }
+.valid-check {
+  position: absolute; right: 14px; color: var(--green);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.password-strength {
+  display: flex; align-items: center; gap: 8px; margin-top: 4px;
+}
+.strength-bar {
+  flex: 1; height: 4px; background: var(--border); border-radius: 4px;
+  position: relative; overflow: hidden;
+}
+.strength-bar::after {
+  content: ''; position: absolute; left: 0; top: 0; height: 100%;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+.strength-bar.level-0::after { width: 0; }
+.strength-bar.level-1::after { width: 33%; background: var(--red); }
+.strength-bar.level-2::after { width: 66%; background: #fdcb6e; }
+.strength-bar.level-3::after { width: 100%; background: var(--green); }
+
+.strength-text {
+  font-size: 0.65rem; font-weight: 800; color: var(--text-muted);
+  width: 50px; text-align: right; text-transform: uppercase;
 }
 
 .form-options {

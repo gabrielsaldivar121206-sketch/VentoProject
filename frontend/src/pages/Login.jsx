@@ -61,6 +61,23 @@ const Login = () => {
   const [message, setMessage] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
+  
+  /* UX Validation States */
+  const [emailValid, setEmailValid] = useState(false);
+  const [passStrength, setPassStrength] = useState(0);
+
+  useEffect(() => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setEmailValid(regex.test(email));
+  }, [email]);
+
+  useEffect(() => {
+    let s = 0;
+    if (password.length > 5) s += 1;
+    if (/[A-Z]/.test(password)) s += 1;
+    if (/[0-9!@#$%^&*]/.test(password)) s += 1;
+    setPassStrength(password.length === 0 ? 0 : s);
+  }, [password]);
 
   /* Datos para registro facial */
   const [faceRegName, setFaceRegName] = useState('');
@@ -161,7 +178,7 @@ const Login = () => {
   /* ── Limpiar mensaje automáticamente ── */
   useEffect(() => {
     if (!message.text) return;
-    const t = setTimeout(() => setMessage({ text: '', type: '' }), 5000);
+    const t = setTimeout(() => setMessage({ text: '', type: '' }), 3000); // 3 segundos
     return () => clearTimeout(t);
   }, [message]);
 
@@ -385,10 +402,16 @@ const Login = () => {
             {message.text && (
               <motion.div
                 className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-error'}`}
-                initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                initial={{ opacity: 0, y: -20, scale: 0.95 }} 
+                animate={{ opacity: 1, y: 0, scale: 1 }} 
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}
               >
-                {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-                {message.text}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                  <span>{message.text}</span>
+                </div>
+                <button className="alert-close" onClick={() => setMessage({ text: '', type: '' })} aria-label="Cerrar alerta">✕</button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -426,10 +449,11 @@ const Login = () => {
                       <form className="login-form" onSubmit={handleLogin}>
                         <div>
                           <label className="form-label">Correo electrónico</label>
-                          <div className="input-wrap">
+                          <div className={`input-wrap ${email.length > 0 && emailValid ? 'valid-input' : ''}`}>
                             <Mail size={16} className="input-icon" />
                             <input className="field" type="email" placeholder="tu@correo.com"
                               value={email} onChange={e => setEmail(e.target.value)} required />
+                            {emailValid && <CheckCircle2 size={16} className="valid-check" />}
                           </div>
                         </div>
                         <div>
@@ -540,10 +564,11 @@ const Login = () => {
                   </div>
                   <div>
                     <label className="form-label">Correo electrónico</label>
-                    <div className="input-wrap">
+                    <div className={`input-wrap ${email.length > 0 && emailValid ? 'valid-input' : ''}`}>
                       <Mail size={16} className="input-icon" />
                       <input className="field" type="email" placeholder="tu@correo.com"
                         value={email} onChange={e => setEmail(e.target.value)} required />
+                      {emailValid && <CheckCircle2 size={16} className="valid-check" />}
                     </div>
                   </div>
                   <div>
@@ -552,10 +577,18 @@ const Login = () => {
                       <Lock size={16} className="input-icon" />
                       <input className="field has-eye" type={showPassword ? 'text' : 'password'} placeholder="Mínimo 6 caracteres"
                         value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
-                      <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)}>
+                      <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)} aria-label="Mostrar/ocultar contraseña">
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
+                    {password.length > 0 && (
+                      <div className="password-strength">
+                        <div className={`strength-bar level-${passStrength}`}></div>
+                        <span className="strength-text">
+                          {passStrength === 0 ? 'Muy débil' : passStrength === 1 ? 'Débil' : passStrength === 2 ? 'Media' : 'Fuerte'}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <button type="submit" className="btn btn-primary" disabled={loading}>
                     {loading ? <Loader2 size={18} className="spin" /> : <UserPlus size={18} />}

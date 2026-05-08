@@ -5,16 +5,16 @@ import { useNavigate } from 'react-router-dom';
 /* ══════════════════════════════════════════════
    QUICK ACTIONS FAB
    - Floating "+" button for quick actions
-   - Expands to show action options
+   - Premium VentoEdu Aesthetic (No green)
    - Smooth Framer Motion animations
 ══════════════════════════════════════════════ */
 
 const ACTIONS = [
-  { emoji: '🗣️', label: 'Inglés',     route: '/english',      color: '#58cc02' },
+  { emoji: '🗣️', label: 'Inglés',     route: '/english',      color: '#00f2ff' },
   { emoji: '🎵', label: 'Música',     route: '/music',        color: '#ff6b9d' },
-  { emoji: '🔢', label: 'Matemáticas',route: '/math',         color: '#00b894' },
-  { emoji: '♟️', label: 'Ajedrez',    route: '/chess',        color: '#fdcb6e' },
-  { emoji: '✋', label: 'Señas',      route: '/signlanguage', color: '#00f2ff' },
+  { emoji: '🔢', label: 'Matemáticas',route: '/math',         color: '#fdcb6e' },
+  { emoji: '♟️', label: 'Ajedrez',    route: '/chess',        color: '#a29bfe' },
+  { emoji: '✋', label: 'Señas',      route: '/signlanguage', color: '#ce82ff' },
 ];
 
 const QuickActionsFab = () => {
@@ -45,7 +45,7 @@ const QuickActionsFab = () => {
               style={{
                 position: 'fixed', inset: 0,
                 background: 'rgba(0,0,0,0.4)',
-                backdropFilter: 'blur(4px)',
+                backdropFilter: 'blur(6px)',
                 zIndex: -1,
               }}
             />
@@ -68,24 +68,24 @@ const QuickActionsFab = () => {
                   width: 'auto',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
-                  padding: '10px 18px 10px 14px',
-                  background: 'linear-gradient(135deg, rgba(20,20,50,0.95), rgba(15,15,35,0.95))',
+                  gap: '12px',
+                  padding: '12px 20px 12px 16px',
+                  background: 'rgba(15, 15, 30, 0.85)',
                   border: `1px solid ${action.color}40`,
-                  borderRadius: '999px',
+                  borderRadius: '100px',
                   cursor: 'pointer',
-                  fontFamily: "'Nunito', sans-serif",
+                  fontFamily: "var(--font), sans-serif",
                   fontWeight: 800,
-                  fontSize: '0.85rem',
+                  fontSize: '0.9rem',
                   color: action.color,
-                  boxShadow: `0 4px 20px rgba(0,0,0,0.3), 0 0 15px ${action.color}15`,
-                  backdropFilter: 'blur(12px)',
+                  boxShadow: `0 8px 24px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.05)`,
+                  backdropFilter: 'blur(16px)',
                   whiteSpace: 'nowrap',
                 }}
-                whileHover={{ scale: 1.06, x: -4 }}
+                whileHover={{ scale: 1.05, x: -5, borderColor: action.color, boxShadow: `0 10px 30px rgba(0,0,0,0.5), 0 0 15px ${action.color}40` }}
                 whileTap={{ scale: 0.95 }}
               >
-                <span style={{ fontSize: '1.3rem' }}>{action.emoji}</span>
+                <span style={{ fontSize: '1.4rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>{action.emoji}</span>
                 {action.label}
               </motion.button>
             ))}
@@ -96,29 +96,29 @@ const QuickActionsFab = () => {
       {/* Main FAB */}
       <motion.button
         onClick={() => setOpen(!open)}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        animate={{ rotate: open ? 45 : 0 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        animate={{ rotate: open ? 135 : 0 }}
         transition={{ type: 'spring', stiffness: 400, damping: 20 }}
         style={{
-          width: '60px', height: '60px',
+          width: '64px', height: '64px',
           borderRadius: '50%',
-          border: 'none',
+          border: '1px solid rgba(255,255,255,0.1)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: '1.8rem',
           color: '#fff',
-          background: 'linear-gradient(135deg, #58cc02, #45a300)',
-          boxShadow: '0 6px 0 #3d8f00, 0 8px 30px rgba(88,204,2,0.3)',
+          background: 'linear-gradient(135deg, #ce82ff, #6c5ce7)',
+          boxShadow: '0 8px 30px rgba(108,92,231,0.5), inset 0 2px 5px rgba(255,255,255,0.3)',
           fontWeight: 900,
-          fontFamily: "'Nunito', sans-serif",
+          fontFamily: "var(--font), sans-serif",
           position: 'relative',
           zIndex: 1,
         }}
       >
-        {open ? '✕' : '⚡'}
+        {open ? '+' : '⚡'}
       </motion.button>
 
       {/* Label */}
@@ -130,19 +130,21 @@ const QuickActionsFab = () => {
             exit={{ opacity: 0, x: 10 }}
             style={{
               position: 'absolute',
-              right: '72px',
-              bottom: '16px',
-              padding: '6px 14px',
-              borderRadius: '999px',
-              background: 'rgba(15,15,35,0.9)',
-              border: '1px solid rgba(88,204,2,0.2)',
-              backdropFilter: 'blur(12px)',
-              color: '#58cc02',
-              fontSize: '0.75rem',
+              right: '80px',
+              bottom: '18px',
+              padding: '8px 16px',
+              borderRadius: '100px',
+              background: 'rgba(20, 15, 40, 0.85)',
+              border: '1px solid rgba(206, 130, 255, 0.3)',
+              backdropFilter: 'blur(16px)',
+              color: '#ce82ff',
+              fontSize: '0.85rem',
               fontWeight: 800,
-              fontFamily: "'Nunito', sans-serif",
+              fontFamily: "var(--font), sans-serif",
               whiteSpace: 'nowrap',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.4), 0 0 15px rgba(206, 130, 255, 0.2)',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
             }}
           >
             Practicar hoy

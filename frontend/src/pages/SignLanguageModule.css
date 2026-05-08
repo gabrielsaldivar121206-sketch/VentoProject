@@ -2,10 +2,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 .sl-home,.sl-detector,.sl-learn,.sl-done-screen{
-  --cyan:#00f2ff;--cyan-dim:rgba(0,242,255,0.12);--cyan-glow:rgba(0,242,255,0.4);
-  --purple:#a855f7;--green:#22c55e;--bg:#07090f;--surface:rgba(255,255,255,0.04);
-  --border:rgba(255,255,255,0.08);--border-c:rgba(0,242,255,0.3);
-  --text:#e2e8f0;--muted:#64748b;--radius:24px;--font:'Inter',system-ui,sans-serif;
+  --cyan:var(--cyan);--cyan-dim:rgba(0,206,201,0.12);--cyan-glow:rgba(0,206,201,0.4);
+  --purple:var(--purple);--green:var(--green);--bg:var(--bg-page);--surface:var(--bg-card-glass);
+  --border:var(--border);--border-c:var(--border-focus);
+  --text:var(--text);--muted:var(--text-muted);--radius:24px;--font:var(--font);
   font-family:var(--font);color:var(--text);
 }
 
@@ -21,10 +21,10 @@
 .sl-back-btn{
   font-family:var(--font);font-size:13px;font-weight:600;
   padding:8px 16px;border-radius:100px;
-  border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);
-  color:var(--muted);cursor:pointer;transition:all 0.25s;backdrop-filter:blur(8px);
+  border:1px solid var(--border);background:var(--bg-input);
+  color:var(--text-secondary);cursor:pointer;transition:all 0.25s;backdrop-filter:blur(8px);
 }
-.sl-back-btn:hover{color:#fff;border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.09);}
+.sl-back-btn:hover{color:var(--text);border-color:var(--border-focus);background:var(--bg-card);}
 .sl-spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,0.07);border-top-color:var(--cyan);border-radius:50%;animation:slSpin 0.8s linear infinite;}
 @keyframes slSpin{to{transform:rotate(360deg)}}
 .sl-overlay{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(7,9,15,0.9);backdrop-filter:blur(10px);font-size:14px;color:var(--muted);}
@@ -87,11 +87,12 @@
 
 .sl-mode-card{
   position:relative;overflow:hidden;
-  background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));
-  border:1px solid rgba(255,255,255,0.09);border-radius:var(--radius);padding:28px;
+  background:var(--bg-card-glass);
+  border:1px solid var(--border);border-radius:var(--radius);padding:28px;
   cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:0;
   transition:transform 0.25s,border-color 0.3s,box-shadow 0.3s;
-  font-family:var(--font);backdrop-filter:blur(12px);
+  font-family:var(--font);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  box-shadow:var(--shadow-card);
 }
 .sl-mode-card::before{
   content:'';position:absolute;inset:0;border-radius:var(--radius);
