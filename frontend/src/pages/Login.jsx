@@ -37,31 +37,33 @@ const Login = () => {
     localStorage.setItem('vento-theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
+  const toggleTheme = () => {
+    setTheme(t => t === 'light' ? 'dark' : 'light');
+  };
 
   /* ── Iniciar sesión en AuthContext y navegar al dashboard ── */
   const redirectToApp = (user) => {
     authLogin({
-      id:       user.id     || user.userId || null,
-      name:     user.name   || user.email,
-      email:    user.email  || '',
-      role:     user.role   || 'student',
-      method:   user.method || 'email',
+      id: user.id || user.userId || null,
+      name: user.name || user.email,
+      email: user.email || '',
+      role: user.role || 'student',
+      method: user.method || 'email',
       progress: user.progress || {},
     });
     navigate('/dashboard');
   };
 
-  const [email,        setEmail]        = useState('');
-  const [password,     setPassword]     = useState('');
-  const [name,         setName]         = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [message,      setMessage]      = useState({ text: '', type: '' });
-  const [loading,      setLoading]      = useState(false);
+  const [message, setMessage] = useState({ text: '', type: '' });
+  const [loading, setLoading] = useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
 
   /* Datos para registro facial */
-  const [faceRegName,  setFaceRegName]  = useState('');
+  const [faceRegName, setFaceRegName] = useState('');
   const [faceRegEmail, setFaceRegEmail] = useState('');
 
   /* Google Identity Services listo */
@@ -101,7 +103,7 @@ const Login = () => {
   const handleGoogleCallback = useCallback(async (response) => {
     setLoading(true);
     try {
-      const res  = await apiFetch('/api/google-login', {
+      const res = await apiFetch('/api/google-login', {
         method: 'POST',
         body: JSON.stringify({ credential: response.credential }),
       });
@@ -122,7 +124,7 @@ const Login = () => {
       if (!window.google) return;
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback:  handleGoogleCallback,
+        callback: handleGoogleCallback,
       });
       setGoogleReady(true);
     };
@@ -141,9 +143,9 @@ const Login = () => {
     try {
       googleBtnRef.current.innerHTML = '';
       window.google.accounts.id.renderButton(googleBtnRef.current, {
-        theme: theme === 'dark' ? 'filled_black' : 'outline',
-        size:  'large',
-        text:  'signin_with',
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
         shape: 'rectangular',
         width: googleBtnRef.current.offsetWidth || 360,
         locale: 'es',
@@ -151,7 +153,7 @@ const Login = () => {
     } catch (e) {
       console.warn('Google renderButton error:', e);
     }
-  }, [googleReady, mode, activeTab, theme]);
+  }, [googleReady, mode, activeTab]);
 
   /* ── Limpiar mensaje automáticamente ── */
   useEffect(() => {
@@ -174,7 +176,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res  = await apiFetch('/api/register', {
+      const res = await apiFetch('/api/register', {
         method: 'POST',
         body: JSON.stringify({ name, email, password }),
       });
@@ -197,7 +199,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res  = await apiFetch('/api/login', {
+      const res = await apiFetch('/api/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
@@ -220,7 +222,7 @@ const Login = () => {
   const handleFaceLogin = async (descriptor) => {
     setLoading(true);
     try {
-      const res  = await apiFetch('/api/face-profiles');
+      const res = await apiFetch('/api/face-profiles');
       const data = await res.json();
       if (!res.ok || !data.profiles?.length) {
         speak('No hay rostros registrados. Regístrate primero.');
@@ -230,16 +232,16 @@ const Login = () => {
         return;
       }
       let bestMatch = null;
-      let bestDist  = Infinity;
+      let bestDist = Infinity;
       for (const profile of data.profiles) {
         const saved = new Float32Array(profile.descriptor);
-        const dist  = faceapi.euclideanDistance(descriptor, saved);
+        const dist = faceapi.euclideanDistance(descriptor, saved);
         if (dist < bestDist) { bestDist = dist; bestMatch = profile; }
       }
       if (bestDist < FACE_MATCH_THRESHOLD && bestMatch) {
         let fullUser = { name: bestMatch.name, email: bestMatch.email, method: 'face', role: 'student', progress: {} };
         try {
-          const uRes  = await apiFetch(`/api/user-by-email?email=${encodeURIComponent(bestMatch.email)}&autoCreateName=${encodeURIComponent(bestMatch.name)}`);
+          const uRes = await apiFetch(`/api/user-by-email?email=${encodeURIComponent(bestMatch.email)}&autoCreateName=${encodeURIComponent(bestMatch.name)}`);
           const uData = await uRes.json();
           if (uRes.ok) fullUser = { ...fullUser, ...uData, method: 'face' };
         } catch { /* si falla, usar datos básicos */ }
@@ -268,11 +270,11 @@ const Login = () => {
     setMode('login');
     setLoading(true);
     try {
-      const res  = await apiFetch('/api/face-profile', {
+      const res = await apiFetch('/api/face-profile', {
         method: 'POST',
         body: JSON.stringify({
-          name:       faceRegName.trim(),
-          email:      faceRegEmail.trim().toLowerCase(),
+          name: faceRegName.trim(),
+          email: faceRegEmail.trim().toLowerCase(),
           descriptor: Array.from(descriptor),
         }),
       });
@@ -291,13 +293,13 @@ const Login = () => {
   /* ══════════════════════════════════════════════
      RENDER
   ══════════════════════════════════════════════ */
-  const showFaceLoginScanner    = mode === 'face-login';
+  const showFaceLoginScanner = mode === 'face-login';
   const showFaceRegisterScanner = mode === 'face-scan-reg';
 
   const slideVariants = {
     initial: { opacity: 0, x: 20 },
     animate: { opacity: 1, x: 0 },
-    exit:    { opacity: 0, x: -20 },
+    exit: { opacity: 0, x: -20 },
   };
 
   return (
@@ -305,46 +307,49 @@ const Login = () => {
 
       {/* ══════ PANEL IZQUIERDO ══════ */}
       <div className="login-left">
+        <div className="left-bg-light" />
         <div className="orb orb-1" /><div className="orb orb-2" /><div className="orb orb-3" />
         <span className="fl-sign s1">📚</span><span className="fl-sign s2">🎵</span>
         <span className="fl-sign s3">🧮</span><span className="fl-sign s4">♟️</span>
         <span className="fl-sign s5">🤟</span>
 
-        <div className="left-brand">
-          <span className="left-mascot">🎓</span>
-          <h1 className="left-title">VentoEdu</h1>
-          <p className="left-tagline">
-            La forma más divertida de aprender<br/>
-            Inglés, Música, Matemáticas y más
-          </p>
-        </div>
+        <div className="left-content-wrapper">
+          <div className="left-brand">
+            <span className="left-mascot">🎓</span>
+            <h1 className="left-title">VentoEdu</h1>
+            <p className="left-tagline">
+              La plataforma interactiva para dominar<br />
+              Inglés, Música, Matemáticas y más.
+            </p>
+          </div>
 
-        <div className="feature-list">
-          {[
-            { icon: '🎮', title: 'Aprende jugando',     desc: 'Lecciones interactivas y gamificadas' },
-            { icon: '🌍', title: 'Múltiples cursos',    desc: 'Inglés, Música, Señas y más' },
-            { icon: '🏆', title: 'Gana logros',         desc: 'Sistema de puntos y recompensas' },
-            { icon: '🔐', title: 'Face ID con IA',      desc: 'Acceso biométrico seguro' },
-          ].map((f, i) => (
-            <div key={i} className="feature-card">
-              <span className="feature-icon">{f.icon}</span>
-              <div>
-                <div className="feature-title">{f.title}</div>
-                <div className="feature-desc">{f.desc}</div>
+          <div className="feature-grid">
+            {[
+              { icon: '🎮', title: 'Aprende jugando', desc: 'Lecciones 100% gamificadas' },
+              { icon: '🌍', title: 'Múltiples cursos', desc: 'Inglés, Señas, y mucho más' },
+              { icon: '🏆', title: 'Gana logros', desc: 'Puntos y recompensas épicas' },
+              { icon: '🔐', title: 'Face ID con IA', desc: 'Acceso biométrico seguro' },
+            ].map((f, i) => (
+              <div key={i} className="feature-grid-card">
+                <div className="feature-icon-wrapper">{f.icon}</div>
+                <div className="feature-text-content">
+                  <div className="feature-title">{f.title}</div>
+                  <div className="feature-desc">{f.desc}</div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="stats-row">
-          <div className="stat"><div className="stat-num">50K+</div><div className="stat-label">Estudiantes</div></div>
-          <div className="stat-divider" />
-          <div className="stat"><div className="stat-num">5+</div><div className="stat-label">Cursos</div></div>
-          <div className="stat-divider" />
-          <div className="stat"><div className="stat-num">4.9⭐</div><div className="stat-label">Valoración</div></div>
-        </div>
+          <div className="stats-panel">
+            <div className="stat-item"><span className="stat-value">50K+</span><span className="stat-label">Alumnos</span></div>
+            <div className="stat-divider" />
+            <div className="stat-item"><span className="stat-value">5+</span><span className="stat-label">Cursos</span></div>
+            <div className="stat-divider" />
+            <div className="stat-item"><span className="stat-value">4.9⭐</span><span className="stat-label">Reseñas</span></div>
+          </div>
 
-        <div className="left-badge"><span />&nbsp;Node.js · Firebase · Face-API</div>
+          <div className="left-badge"><span />&nbsp;Plataforma Educativa Segura</div>
+        </div>
       </div>
 
       {/* ══════ PANEL DERECHO ══════ */}
@@ -389,7 +394,7 @@ const Login = () => {
                 className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-error'}`}
                 initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
               >
-                {message.type === 'success' ? <CheckCircle2 size={16}/> : <AlertCircle size={16}/>}
+                {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
                 {message.text}
               </motion.div>
             )}
@@ -409,13 +414,13 @@ const Login = () => {
                     className={`method-tab ${activeTab === 'credentials' ? 'method-tab--active' : ''}`}
                     onClick={() => setActiveTab('credentials')}
                   >
-                    <LogIn size={14}/> Correo
+                    <LogIn size={14} /> Correo
                   </button>
                   <button
                     className={`method-tab ${activeTab === 'faceid' ? 'method-tab--active' : ''}`}
                     onClick={() => setActiveTab('faceid')}
                   >
-                    <ScanFace size={14}/> Face ID
+                    <ScanFace size={14} /> Face ID
                   </button>
                 </div>
 
@@ -429,7 +434,7 @@ const Login = () => {
                         <div>
                           <label className="form-label">Correo electrónico</label>
                           <div className="input-wrap">
-                            <Mail size={16} className="input-icon"/>
+                            <Mail size={16} className="input-icon" />
                             <input className="field" type="email" placeholder="tu@correo.com"
                               value={email} onChange={e => setEmail(e.target.value)} required />
                           </div>
@@ -437,28 +442,28 @@ const Login = () => {
                         <div>
                           <label className="form-label">Contraseña</label>
                           <div className="input-wrap">
-                            <Lock size={16} className="input-icon"/>
+                            <Lock size={16} className="input-icon" />
                             <input className="field has-eye" type={showPassword ? 'text' : 'password'} placeholder="••••••••"
                               value={password} onChange={e => setPassword(e.target.value)} required />
                             <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)}>
-                              {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
+                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                           </div>
                         </div>
                         <button type="submit" className="btn btn-primary" disabled={loading}>
-                          {loading ? <Loader2 size={18} className="spin"/> : <ArrowRight size={18}/>}
+                          {loading ? <Loader2 size={18} className="spin" /> : <ArrowRight size={18} />}
                           {loading ? 'Verificando…' : 'Iniciar sesión'}
                         </button>
                       </form>
 
                       <div className="divider">
-                        <div className="divider-line"/> <span>o continúa con</span> <div className="divider-line"/>
+                        <div className="divider-line" /> <span>o continúa con</span> <div className="divider-line" />
                       </div>
 
                       <div className="social-row">
                         {GOOGLE_CLIENT_ID ? (
                           <div className="google-btn-wrapper">
-                            <div ref={googleBtnRef} style={{ width: '100%' }} />
+                            <div ref={googleBtnRef} style={{ width: '100%', display: 'flex', justifyContent: 'center' }} />
                             {!googleReady && (
                               <button className="btn btn-outline" disabled>
                                 <Loader2 size={16} className="spin" /> Cargando Google…
@@ -471,6 +476,10 @@ const Login = () => {
                           </button>
                         )}
                       </div>
+
+                      <button className="toggle-link" onClick={() => setMode('register-email')}>
+                        ¿Eres nuevo? ¡Crea una cuenta!
+                      </button>
                     </motion.div>
                   )}
 
@@ -480,30 +489,26 @@ const Login = () => {
                       transition={{ duration: 0.15 }}
                     >
                       <div className="faceid-section">
-                        <span className="faceid-label"><ScanFace size={14}/> Reconocimiento Facial</span>
+                        <span className="faceid-label"><ScanFace size={14} /> Reconocimiento Facial</span>
                         {!modelsLoaded && (
                           <span className="models-badge">
-                            <Loader2 size={11} className="spin"/> Cargando modelos IA…
+                            <Loader2 size={11} className="spin" /> Cargando modelos IA…
                           </span>
                         )}
                         <div className="faceid-buttons">
                           <button className="btn btn-purple" disabled={!modelsLoaded || loading}
                             onClick={() => setMode('face-login')}>
-                            <ScanFace size={16}/> Entrar
+                            <ScanFace size={16} /> Entrar
                           </button>
                           <button className="btn btn-outline" disabled={!modelsLoaded || loading}
                             onClick={() => setMode('face-register')}>
-                            <UserPlus size={16}/> Registrar
+                            <UserPlus size={16} /> Registrar
                           </button>
                         </div>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-
-                <button className="toggle-link" onClick={() => setMode('register-email')}>
-                  ¿Eres nuevo? ¡Crea una cuenta!
-                </button>
               </motion.div>
             )}
 
@@ -517,7 +522,7 @@ const Login = () => {
                   <div>
                     <label className="form-label">Tu nombre</label>
                     <div className="input-wrap">
-                      <User size={16} className="input-icon"/>
+                      <User size={16} className="input-icon" />
                       <input className="field" type="text" placeholder="¿Cómo te llamas?"
                         value={name} onChange={e => setName(e.target.value)} required />
                     </div>
@@ -525,7 +530,7 @@ const Login = () => {
                   <div>
                     <label className="form-label">Correo electrónico</label>
                     <div className="input-wrap">
-                      <Mail size={16} className="input-icon"/>
+                      <Mail size={16} className="input-icon" />
                       <input className="field" type="email" placeholder="tu@correo.com"
                         value={email} onChange={e => setEmail(e.target.value)} required />
                     </div>
@@ -533,16 +538,16 @@ const Login = () => {
                   <div>
                     <label className="form-label">Contraseña</label>
                     <div className="input-wrap">
-                      <Lock size={16} className="input-icon"/>
+                      <Lock size={16} className="input-icon" />
                       <input className="field has-eye" type={showPassword ? 'text' : 'password'} placeholder="Mínimo 6 caracteres"
-                        value={password} onChange={e => setPassword(e.target.value)} required minLength={6}/>
+                        value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
                       <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)}>
-                        {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
                   </div>
-                  <button type="submit" className="btn btn-green" disabled={loading}>
-                    {loading ? <Loader2 size={18} className="spin"/> : <UserPlus size={18}/>}
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? <Loader2 size={18} className="spin" /> : <UserPlus size={18} />}
                     {loading ? 'Creando cuenta…' : 'Crear cuenta'}
                   </button>
                 </form>
@@ -565,23 +570,23 @@ const Login = () => {
                   <div>
                     <label className="form-label">Tu nombre</label>
                     <div className="input-wrap">
-                      <User size={16} className="input-icon"/>
+                      <User size={16} className="input-icon" />
                       <input className="field" type="text" placeholder="¿Cómo te llamas?"
-                        value={faceRegName} onChange={e => setFaceRegName(e.target.value)}/>
+                        value={faceRegName} onChange={e => setFaceRegName(e.target.value)} />
                     </div>
                   </div>
                   <div>
                     <label className="form-label">Tu correo electrónico</label>
                     <div className="input-wrap">
-                      <Mail size={16} className="input-icon"/>
+                      <Mail size={16} className="input-icon" />
                       <input className="field" type="email" placeholder="tu@correo.com"
-                        value={faceRegEmail} onChange={e => setFaceRegEmail(e.target.value)}/>
+                        value={faceRegEmail} onChange={e => setFaceRegEmail(e.target.value)} />
                     </div>
                   </div>
                   <button className="btn btn-purple"
                     disabled={!faceRegName.trim() || !faceRegEmail.trim() || !modelsLoaded}
                     onClick={() => setMode('face-scan-reg')}>
-                    <ScanFace size={18}/> Escanear mi rostro
+                    <ScanFace size={18} /> Escanear mi rostro
                   </button>
                   <button className="btn btn-outline" onClick={() => { setMode('login'); setActiveTab('faceid'); }}>
                     Cancelar
@@ -593,7 +598,7 @@ const Login = () => {
           </AnimatePresence>
 
           <div className="login-footer">
-            <ShieldCheck size={12}/> Node.js + Firebase · VentoEdu
+            <ShieldCheck size={12} /> Node.js + Firebase · VentoEdu
           </div>
         </div>{/* /login-card */}
       </div>{/* /login-right */}
