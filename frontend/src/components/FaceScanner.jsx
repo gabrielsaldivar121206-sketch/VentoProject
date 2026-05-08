@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaceLandmarker } from '@mediapipe/tasks-vision';
 import { useMediaPipe } from '../hooks/useMediaPipe';
-import { X, Loader2, CheckCircle2, AlertCircle, Camera } from 'lucide-react';
+import { X, Loader2, CheckCircle2, AlertCircle, Camera, ScanFace } from 'lucide-react';
 import * as faceapi from 'face-api.js';
 
 /**
@@ -283,60 +283,61 @@ const FaceScanner = ({ mode = 'login', modelsLoaded, onResult, onCancel, speak }
 
         {/* Header */}
         <div style={S.header}>
-          <span style={{ fontSize: '2.2rem' }}>{emoji}</span>
-          <h2 style={S.title}>{title}</h2>
-          <p style={S.subtitle}>
-            {isLogin
-              ? 'Mira directo a la cámara y presiona el botón'
-              : 'Mira directo a la cámara para registrar tu rostro'}
-          </p>
+          <div style={S.iconWrap}>
+            {isLogin ? <ScanFace size={28} color="#ce82ff"/> : <Camera size={28} color="#58cc02"/>}
+          </div>
+          <div>
+            <h2 style={S.title}>{title}</h2>
+            <p style={S.subtitle}>
+              {isLogin
+                ? 'Mira a la cámara para entrar'
+                : 'Ubica tu rostro en el círculo'}
+            </p>
+          </div>
         </div>
 
         {/* Visor */}
-        <div style={{ ...S.viewfinder, borderColor: faceDetected ? accent : '#e0e0e0' }}>
-          <video ref={videoRef} autoPlay muted playsInline style={S.video} />
-          <canvas ref={canvasRef} style={S.canvas} />
+        <div style={{ ...S.viewfinderWrap, padding: faceDetected ? '4px' : '4px', background: faceDetected ? `linear-gradient(135deg, ${accent}, transparent)` : 'transparent' }}>
+          <div style={{ ...S.viewfinder, borderColor: faceDetected ? accent : 'rgba(255,255,255,0.1)' }}>
+            <video ref={videoRef} autoPlay muted playsInline style={S.video} />
+            <canvas ref={canvasRef} style={S.canvas} />
 
-          {/* Esquinas */}
-          {['tl','tr','bl','br'].map(pos => (
-            <div key={pos} style={{ ...S.corner, ...cornerPos(pos), borderColor: accent }} />
-          ))}
+            {/* Línea de escaneo buscando */}
+            {camStatus === 'BUSCANDO' && (
+              <motion.div
+                style={{ ...S.scanLine, background: accent, boxShadow: `0 0 15px ${accent}` }}
+                animate={{ top: ['0%', '100%', '0%'] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            )}
 
-          {/* Línea de escaneo buscando */}
-          {camStatus === 'BUSCANDO' && (
-            <motion.div
-              style={{ ...S.scanLine, background: accent }}
-              animate={{ top: ['8%', '88%', '8%'] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          )}
+            {/* ✅ Overlay PROCESANDO: pulsación sobre la malla (malla sigue viva) */}
+            {actionState === 'scanning' && (
+              <motion.div
+                style={S.scanningOverlay}
+                animate={{ opacity: [0.55, 0.85, 0.55] }}
+                transition={{ duration: 0.9, repeat: Infinity }}
+              >
+                <Loader2 size={52} color="#fff" style={{ animation: 'spin360 0.7s linear infinite' }} />
+                <span style={{ color: '#fff', fontWeight: 800, fontSize: '0.8rem', marginTop: 8 }}>
+                  {isLogin ? 'Analizando…' : 'Capturando…'}
+                </span>
+              </motion.div>
+            )}
 
-          {/* ✅ Overlay PROCESANDO: pulsación sobre la malla (malla sigue viva) */}
-          {actionState === 'scanning' && (
-            <motion.div
-              style={S.scanningOverlay}
-              animate={{ opacity: [0.55, 0.85, 0.55] }}
-              transition={{ duration: 0.9, repeat: Infinity }}
-            >
-              <Loader2 size={52} color="#fff" style={{ animation: 'spin360 0.7s linear infinite' }} />
-              <span style={{ color: '#fff', fontWeight: 800, fontSize: '0.8rem', marginTop: 8 }}>
-                {isLogin ? 'Analizando…' : 'Capturando…'}
-              </span>
-            </motion.div>
-          )}
-
-          {/* Overlay éxito */}
-          {actionState === 'success' && (
-            <div style={S.successOverlay}>
-              <CheckCircle2 size={60} color="#fff" />
-            </div>
-          )}
+            {/* Overlay éxito */}
+            {actionState === 'success' && (
+              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} style={S.successOverlay}>
+                <CheckCircle2 size={64} color="#fff" />
+              </motion.div>
+            )}
+          </div>
         </div>
 
         {/* Pill de estado */}
         <div style={S.statusRow}>
           <motion.div
-            style={{ ...S.statusDot, background: statusColor }}
+            style={{ ...S.statusDot, background: statusColor, boxShadow: `0 0 10px ${statusColor}` }}
             animate={{ scale: camStatus === 'LISTO' ? [1, 1.4, 1] : 1 }}
             transition={{ repeat: Infinity, duration: 1.1 }}
           />
@@ -352,13 +353,13 @@ const FaceScanner = ({ mode = 'login', modelsLoaded, onResult, onCancel, speak }
               exit={{ opacity: 0 }}
               style={{
                 ...S.actionMsg,
-                background: actionState === 'success' ? '#e8f9e0'
-                          : actionState === 'error'   ? '#ffe5e5' : '#f0f0f0',
-                color: actionState === 'success' ? '#2a7a0a'
-                     : actionState === 'error'   ? '#aa0000' : '#555',
-                border: `2px solid ${
-                  actionState === 'success' ? '#58cc02'
-                : actionState === 'error'   ? '#ff4b4b' : '#ddd'
+                background: actionState === 'success' ? 'rgba(88, 204, 2, 0.15)'
+                          : actionState === 'error'   ? 'rgba(255, 75, 75, 0.15)' : 'rgba(255,255,255,0.05)',
+                color: actionState === 'success' ? '#72e309'
+                     : actionState === 'error'   ? '#ff6b6b' : '#eee',
+                border: `1px solid ${
+                  actionState === 'success' ? 'rgba(88,204,2,0.3)'
+                : actionState === 'error'   ? 'rgba(255,75,75,0.3)' : 'rgba(255,255,255,0.1)'
                 }`,
               }}
             >
@@ -374,13 +375,13 @@ const FaceScanner = ({ mode = 'login', modelsLoaded, onResult, onCancel, speak }
         <button
           style={{
             ...S.captureBtn,
-            background: captureReady ? accent : '#d7d7d7',
+            background: captureReady ? `linear-gradient(135deg, ${isLogin ? '#dfa8ff, #ce82ff' : '#72e309, #58cc02'})` : 'rgba(255,255,255,0.1)',
+            color: captureReady ? '#fff' : 'rgba(255,255,255,0.4)',
             boxShadow: captureReady
-              ? `0 5px 0 ${isLogin ? '#9c44d4' : '#3d8f00'}`
-              : '0 5px 0 #bbb',
+              ? `0 4px 15px ${isLogin ? 'rgba(206,130,255,0.3)' : 'rgba(88,204,2,0.3)'}, inset 0 1px 0 rgba(255,255,255,0.2)`
+              : 'none',
             cursor: captureReady ? 'pointer' : 'not-allowed',
-            opacity: captureReady ? 1 : 0.65,
-            transform: actionState === 'scanning' ? 'translateY(5px)' : 'none',
+            transform: actionState === 'scanning' ? 'translateY(2px)' : 'none',
           }}
           disabled={!captureReady}
           onClick={handleCapture}
@@ -409,60 +410,62 @@ const FaceScanner = ({ mode = 'login', modelsLoaded, onResult, onCancel, speak }
   );
 };
 
-/* ─── Posición de esquinas ─── */
-const cornerPos = (pos) => ({
-  top:    pos.includes('t') ? -2 : 'auto',
-  bottom: pos.includes('b') ? -2 : 'auto',
-  left:   pos.includes('l') ? -2 : 'auto',
-  right:  pos.includes('r') ? -2 : 'auto',
-  borderTopWidth:    pos.includes('t') ? 3 : 0,
-  borderBottomWidth: pos.includes('b') ? 3 : 0,
-  borderLeftWidth:   pos.includes('l') ? 3 : 0,
-  borderRightWidth:  pos.includes('r') ? 3 : 0,
-});
-
-/* ─── Estilos ─── */
+/* ─── Estilos (Dark Glassmorphism) ─── */
 const S = {
   overlay: {
     position: 'fixed', inset: 0, zIndex: 9999,
-    background: 'rgba(0,0,0,0.72)',
-    backdropFilter: 'blur(10px)',
+    background: 'rgba(10, 10, 25, 0.85)',
+    backdropFilter: 'blur(16px)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     padding: '20px',
     fontFamily: "'Nunito', sans-serif",
   },
   card: {
     position: 'relative',
-    width: '100%', maxWidth: '390px',
-    background: '#fff',
-    borderRadius: '28px',
-    border: '2.5px solid #e5e5e5',
-    boxShadow: '0 8px 0 #d7d7d7, 0 24px 60px rgba(0,0,0,0.18)',
-    padding: '28px 24px 22px',
+    width: '100%', maxWidth: '380px',
+    background: 'linear-gradient(145deg, rgba(30,30,50,0.8) 0%, rgba(20,20,35,0.95) 100%)',
+    borderRadius: '32px',
+    border: '1px solid rgba(255,255,255,0.1)',
+    boxShadow: '0 24px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+    padding: '30px 24px',
     textAlign: 'center',
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
   },
   closeBtn: {
-    position: 'absolute', top: 14, right: 14,
-    background: '#f5f5f5', border: 'none', borderRadius: '12px',
-    width: 34, height: 34,
+    position: 'absolute', top: 16, right: 16,
+    background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.05)', 
+    borderRadius: '50%',
+    width: 36, height: 36,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    cursor: 'pointer', color: '#888',
+    cursor: 'pointer', color: '#fff', transition: 'background 0.2s',
   },
   header: {
-    marginBottom: '14px',
-    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+    marginBottom: '20px', width: '100%',
+    display: 'flex', alignItems: 'center', gap: '14px',
+    textAlign: 'left',
   },
-  title:    { margin: 0, fontSize: '1.3rem', fontWeight: 900, color: '#3c3c3c' },
-  subtitle: { margin: 0, fontSize: '0.8rem', color: '#afafaf', fontWeight: 600 },
+  iconWrap: {
+    width: 52, height: 52, borderRadius: '16px',
+    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)'
+  },
+  title:    { margin: '0 0 2px 0', fontSize: '1.25rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.3px' },
+  subtitle: { margin: 0, fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 },
+  
+  viewfinderWrap: {
+    borderRadius: '50%', marginBottom: '20px',
+    transition: 'all 0.4s ease',
+  },
   viewfinder: {
     position: 'relative',
-    width: '240px', height: '240px',
-    margin: '0 auto 12px',
+    width: '260px', height: '260px',
     borderRadius: '50%',
     overflow: 'hidden',
-    border: '3px solid',
-    background: '#111',
+    border: '4px solid',
+    background: '#050505',
     transition: 'border-color 0.4s ease',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
   },
   video: {
     width: '100%', height: '100%',
@@ -476,50 +479,47 @@ const S = {
     objectFit: 'cover',
     transform: 'scaleX(-1)',
   },
-  corner: {
-    position: 'absolute', width: 18, height: 18,
-    borderStyle: 'solid', zIndex: 10,
-  },
   scanLine: {
     position: 'absolute', left: 0, right: 0,
-    height: '2px', zIndex: 8, opacity: 0.8, borderRadius: '2px',
+    height: '3px', zIndex: 8, opacity: 0.9,
   },
   scanningOverlay: {
     position: 'absolute', inset: 0, zIndex: 14,
-    background: 'rgba(0,0,0,0.52)',
+    background: 'rgba(10,10,25,0.65)', backdropFilter: 'blur(4px)',
     display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
     borderRadius: '50%',
   },
   successOverlay: {
     position: 'absolute', inset: 0, zIndex: 15,
-    background: 'rgba(88,204,2,0.88)',
+    background: 'rgba(88,204,2,0.9)', backdropFilter: 'blur(4px)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     borderRadius: '50%',
   },
   statusRow: {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-    marginBottom: '8px',
+    marginBottom: '12px', background: 'rgba(0,0,0,0.2)',
+    padding: '6px 14px', borderRadius: '99px', border: '1px solid rgba(255,255,255,0.05)',
   },
-  statusDot:  { width: 9, height: 9, borderRadius: '50%', transition: 'background 0.3s' },
-  statusText: { fontSize: '0.8rem', fontWeight: 800, transition: 'color 0.3s' },
+  statusDot:  { width: 8, height: 8, borderRadius: '50%', transition: 'background 0.3s' },
+  statusText: { fontSize: '0.75rem', fontWeight: 800, transition: 'color 0.3s', textTransform: 'uppercase', letterSpacing: '0.5px' },
   actionMsg: {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-    padding: '9px 12px', borderRadius: '13px',
-    fontSize: '0.83rem', fontWeight: 700,
-    marginBottom: '10px',
+    padding: '10px 14px', borderRadius: '14px',
+    fontSize: '0.85rem', fontWeight: 700,
+    marginBottom: '16px', width: '100%',
   },
   captureBtn: {
-    width: '100%', padding: '13px',
-    border: 'none', borderRadius: '18px',
-    color: '#fff', fontSize: '1rem', fontWeight: 900,
+    width: '100%', padding: '14px',
+    border: 'none', borderRadius: '16px',
+    fontSize: '1rem', fontWeight: 900,
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
     fontFamily: "'Nunito', sans-serif",
-    transition: 'transform 0.1s, box-shadow 0.1s, background 0.3s, opacity 0.2s',
+    transition: 'all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)',
   },
   note: {
-    marginTop: '10px', fontSize: '0.72rem',
-    color: '#afafaf', fontWeight: 600, lineHeight: 1.4,
+    marginTop: '16px', fontSize: '0.75rem',
+    color: 'rgba(255,255,255,0.4)', fontWeight: 600, lineHeight: 1.4,
   },
 };
 

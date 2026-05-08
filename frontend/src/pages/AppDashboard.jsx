@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { sounds } from '../hooks/useSounds';
 import { useVentoVoice } from '../hooks/useVentoVoice';
+import QuickActionsFab from '../components/QuickActionsFab';
+import AchievementPopup from '../components/AchievementPopup';
+import { useXpAnimation } from '../components/XpAnimation';
 import './AppDashboard.css';
 import './CourseCardV3.css';
 
@@ -24,6 +27,19 @@ const FloatingParticles = () => {
           animationDuration:`${p.duration}s`, fontSize:`${p.size}rem`
         }}>{p.emoji}</span>
       ))}
+    </div>
+  );
+};
+
+/* ── Animated Streak Fire ── */
+const StreakFire = ({ streak }) => {
+  if (streak <= 0) return null;
+  const size = Math.min(streak * 4 + 20, 60); // grows with streak
+  return (
+    <div className="streak-fire-wrap" title={`🔥 Racha de ${streak} días`}>
+      <span className="streak-fire-emoji" style={{ fontSize: `${size}px` }}>🔥</span>
+      <span className="streak-fire-count">{streak}</span>
+      {streak >= 3 && <span className="streak-fire-label">¡Racha!</span>}
     </div>
   );
 };
@@ -265,7 +281,11 @@ const Dashboard = () => {
     reader.readAsDataURL(file);
   };
 
+  const { showXpGain, XpParticles } = useXpAnimation();
+  const [newAchievement, setNewAchievement] = useState(null);
+
   useEffect(()=>{setTimeout(()=>setMounted(true),100);},[]);
+
 
   const { speak } = useVentoVoice();
   useEffect(()=>{
@@ -322,12 +342,31 @@ const Dashboard = () => {
     return totalXp>=a.unlockAt;
   });
 
+  // Check for new achievements on mount
+  useEffect(() => {
+    const prevUnlocked = parseInt(sessionStorage.getItem('vento_ach_count') || '0');
+    if (unlockedAch.length > prevUnlocked && prevUnlocked > 0) {
+      const newest = unlockedAch[unlockedAch.length - 1];
+      setNewAchievement({ icon: newest.icon, title: newest.title, desc: 'Sigue aprendiendo para desbloquear más' });
+    }
+    sessionStorage.setItem('vento_ach_count', String(unlockedAch.length));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unlockedAch.length]);
+
   const handleLogout=()=>{sounds.navigate();logout();navigate('/login');};
   const initial=user?.name?.charAt(0)?.toUpperCase()||'?';
 
   return (
     <div className={`dashboard-page ${mounted?'mounted':''}`}>
       <FloatingParticles/>
+      <XpParticles/>
+      <QuickActionsFab/>
+      {newAchievement && (
+        <AchievementPopup
+          achievement={newAchievement}
+          onDismiss={() => setNewAchievement(null)}
+        />
+      )}
 
       {/* Navbar */}
       <nav className="dash-navbar">
@@ -338,7 +377,10 @@ const Dashboard = () => {
           </div>
           <div className="dash-nav-pills">
             <div className="nav-pill xp" onMouseEnter={()=>sounds.hover()}><span className="pill-icon">⚡</span><span className="pill-value">{totalXp}</span></div>
-            <div className="nav-pill streak" onMouseEnter={()=>sounds.hover()}><span className="pill-icon">🔥</span><span className="pill-value">{bestStreak}</span></div>
+            <div className="nav-pill streak" onMouseEnter={()=>sounds.hover()}>
+              <StreakFire streak={bestStreak}/>
+              <span className="pill-icon">🔥</span><span className="pill-value">{bestStreak}</span>
+            </div>
             <div className="nav-pill level" onMouseEnter={()=>sounds.hover()}><span className="pill-icon">👑</span><span className="pill-value">Nv.{level}</span></div>
           </div>
           <div className="dash-dropdown">

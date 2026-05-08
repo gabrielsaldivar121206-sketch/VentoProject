@@ -1,6 +1,10 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import OfflineIndicator from './components/OfflineIndicator';
+import PageTransition from './components/PageTransition';
 import Login from './pages/Login';
 import AppDashboard from './pages/AppDashboard';
 import EnglishModule from './pages/EnglishModule';
@@ -23,26 +27,68 @@ const PublicRoute = ({ children }) => {
   return children;
 };
 
-const AppRoutes = () => (
-  <Routes>
-    <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
-    <Route path="/dashboard" element={<ProtectedRoute><AppDashboard /></ProtectedRoute>} />
-    <Route path="/english" element={<ProtectedRoute><EnglishModule /></ProtectedRoute>} />
-    <Route path="/music"   element={<ProtectedRoute><MusicModule /></ProtectedRoute>} />
-    <Route path="/math"    element={<ProtectedRoute><MathModule /></ProtectedRoute>} />
-    <Route path="/chess"   element={<ProtectedRoute><ChessModule /></ProtectedRoute>} />
-    <Route path="/admin"   element={<ProtectedRoute requireAdmin><AdminPanel /></ProtectedRoute>} />
-    <Route path="/signlanguage" element={<ProtectedRoute><SignLanguageModule /></ProtectedRoute>} />
-    <Route path="*" element={<Navigate to="/" replace />} />
-  </Routes>
-);
+/* Animated routes wrapper */
+const AnimatedRoutes = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={
+          <PublicRoute>
+            <PageTransition><Login /></PageTransition>
+          </PublicRoute>
+        } />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <PageTransition><AppDashboard /></PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/english" element={
+          <ProtectedRoute>
+            <PageTransition><EnglishModule /></PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/music" element={
+          <ProtectedRoute>
+            <PageTransition><MusicModule /></PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/math" element={
+          <ProtectedRoute>
+            <PageTransition><MathModule /></PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/chess" element={
+          <ProtectedRoute>
+            <PageTransition><ChessModule /></PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute requireAdmin>
+            <PageTransition><AdminPanel /></PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/signlanguage" element={
+          <ProtectedRoute>
+            <PageTransition><SignLanguageModule /></PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
+      <ToastProvider>
+        <Router>
+          <OfflineIndicator />
+          <AnimatedRoutes />
+        </Router>
+      </ToastProvider>
     </AuthProvider>
   );
 }

@@ -669,3 +669,93 @@
 }
 .profile-remove-photo-btn:hover { background:rgba(255,75,75,0.2); }
 .dash-user-photo { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+
+/* ══════════════════════════════════════════════════
+   ANIMATED STREAK FIRE
+══════════════════════════════════════════════════ */
+.streak-fire-wrap {
+  display: none; /* shown via pill context */
+  position: absolute;
+  top: -8px; right: -8px;
+  flex-direction: column;
+  align-items: center;
+}
+.nav-pill.streak { position: relative; }
+.nav-pill.streak:hover .streak-fire-wrap { display: flex; }
+
+.streak-fire-emoji {
+  animation: fireGrow 0.6s ease-in-out infinite alternate;
+  filter: drop-shadow(0 4px 8px rgba(255,75,75,0.4));
+}
+@keyframes fireGrow {
+  0% { transform: scale(1) translateY(0); }
+  100% { transform: scale(1.15) translateY(-3px); }
+}
+.streak-fire-count {
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #ffc800;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.streak-fire-label {
+  font-size: 0.55rem;
+  font-weight: 900;
+  color: #ff4b4b;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  animation: streakPulse 1s ease-in-out infinite;
+}
+@keyframes streakPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ══════════════════════════════════════════════════
+   IMPROVED HOVER STATES — Dynamic shadows
+══════════════════════════════════════════════════ */
+.dash-stat-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.achievement-card.unlocked:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 10px 30px rgba(255,200,0,0.12);
+}
+
+.daily-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(206,130,255,0.12);
+}
+
+/* ══════════════════════════════════════════════════
+   GREETING STREAK BADGE (new login streak indicator)
+══════════════════════════════════════════════════ */
+.streak-login-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, rgba(255,75,75,0.1), rgba(255,150,0,0.08));
+  border: 1px solid rgba(255,75,75,0.15);
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 0.5s ease both;
+}
+.streak-login-fire {
+  font-size: 2rem;
+  animation: fireGrow 0.6s ease-in-out infinite alternate;
+}
+.streak-login-text {
+  flex: 1;
+}
+.streak-login-title {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #ff4b4b;
+}
+.streak-login-desc {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+}
