@@ -87,6 +87,19 @@ const AnimatedRoutes = () => {
 };
 
 function App() {
+  React.useEffect(() => {
+    // Aplicar el tema globalmente en cuanto la app cargue
+    const saved = localStorage.getItem('vento-theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+    } else {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const defaultTheme = prefersDark ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', defaultTheme);
+      localStorage.setItem('vento-theme', defaultTheme);
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <ToastProvider>

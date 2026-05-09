@@ -30,7 +30,9 @@ const Login = () => {
   /* ── Theme ── */
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('vento-theme');
-    return saved || 'light';
+    if (saved) return saved;
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
   });
 
   useEffect(() => {
@@ -452,10 +454,10 @@ const Login = () => {
                           </div>
                         </div>
                         <div>
-                          <label className="form-label">Contraseña</label>
+                          <label className="form-label">C<span>o</span>ntraseña</label>
                           <div className="input-wrap">
                             <Lock size={16} className="input-icon" />
-                            <input className="field has-eye" type="text" placeholder="••••••••"
+                            <input className="field has-eye" type={showPassword ? 'text' : 'search'} placeholder="Tu clave secreta" name="secret_code"
                               style={!showPassword ? { WebkitTextSecurity: 'disc' } : {}}
                               value={password} onChange={e => setPassword(e.target.value)} required 
                               autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" />
@@ -569,10 +571,10 @@ const Login = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="form-label">Contraseña</label>
+                    <label className="form-label">C<span>o</span>ntraseña</label>
                     <div className="input-wrap">
                       <Lock size={16} className="input-icon" />
-                      <input className="field has-eye" type="text" placeholder="Mínimo 6 caracteres"
+                      <input className="field has-eye" type={showPassword ? 'text' : 'search'} placeholder="Mínimo 6 caracteres" name="secret_code_new"
                         style={!showPassword ? { WebkitTextSecurity: 'disc' } : {}}
                         value={password} onChange={e => setPassword(e.target.value)} required minLength={6} 
                         autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" />
