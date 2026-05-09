@@ -280,10 +280,11 @@ export const sounds = {
   /* ── Welcome Pop — Warm guitar arpeggio (C Major 7, low register) ── */
   welcomePop: () => {
     // Warm ascending arpeggio: C3 → E3 → G3 + B3 (CMaj7, low & cozy)
-    playPluck(130.8, 0.10, 0);      // C3  — "¡Bienvenido" (deep warm)
-    playPluck(164.8, 0.10, 0.25);   // E3  — "a"
-    playPluck(196.0, 0.10, 0.50);   // G3  — "VentoEdu!"
-    playPluck(246.9, 0.06, 0.55);   // B3  — soft sparkle
+    // Volumes increased significantly for better audibility
+    playPluck(130.8, 0.80, 0);      // C3  — "¡Bienvenido" (deep warm)
+    playPluck(164.8, 0.80, 0.25);   // E3  — "a"
+    playPluck(196.0, 0.80, 0.50);   // G3  — "VentoEdu!"
+    playPluck(246.9, 0.60, 0.55);   // B3  — soft sparkle
   },
 
   /* ── Soft Pluck — Single warm tap for clicks/navigation ── */

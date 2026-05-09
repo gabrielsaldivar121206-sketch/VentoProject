@@ -14,19 +14,19 @@ const API_URL = 'http://localhost:5000';
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = sessionStorage.getItem(STORAGE_KEY);
       return stored ? JSON.parse(stored) : null;
     } catch { return null; }
   });
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // Persistir sesión en localStorage
+  // Persistir sesión en sessionStorage
   useEffect(() => {
     if (user) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(user));
     } else {
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
     }
   }, [user]);
 
@@ -45,9 +45,11 @@ export const AuthProvider = ({ children }) => {
   // ── Logout ─────────────────────────────────────────────────────────────────
   const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('vento_token');
     localStorage.removeItem('vento_user');
+    sessionStorage.removeItem('vento_token');
+    sessionStorage.removeItem('vento_user');
     sessionStorage.removeItem('vento_welcomed_this_session');
   }, []);
 
@@ -68,7 +70,7 @@ export const AuthProvider = ({ children }) => {
 
       // Guardar en Firebase vía backend Node.js
       if (prev.id) {
-        const token = localStorage.getItem('vento_token');
+        const token = sessionStorage.getItem('vento_token');
         fetch(`${API_URL}/api/progress/${prev.id}`, {
           method: 'PUT',
           headers: {

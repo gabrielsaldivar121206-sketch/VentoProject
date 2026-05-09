@@ -12,7 +12,7 @@ export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
  * Automáticamente agrega el token JWT si el usuario tiene sesión.
  */
 export const apiFetch = async (endpoint, options = {}) => {
-    const token = localStorage.getItem('vento_token');
+    const token = sessionStorage.getItem('vento_token');
 
     const headers = {
         'Content-Type': 'application/json',
@@ -32,23 +32,23 @@ export const apiFetch = async (endpoint, options = {}) => {
  * Guardar sesión del usuario (token JWT + datos)
  */
 export const saveSession = (token, user) => {
-    localStorage.setItem('vento_token', token);
-    localStorage.setItem('vento_user', JSON.stringify(user));
+    sessionStorage.setItem('vento_token', token);
+    sessionStorage.setItem('vento_user', JSON.stringify(user));
 };
 
 /**
  * Cerrar sesión
  */
 export const clearSession = () => {
-    localStorage.removeItem('vento_token');
-    localStorage.removeItem('vento_user');
+    sessionStorage.removeItem('vento_token');
+    sessionStorage.removeItem('vento_user');
 };
 
 /**
  * Obtener usuario de la sesión actual
  */
 export const getSession = () => {
-    const user = localStorage.getItem('vento_user');
+    const user = sessionStorage.getItem('vento_user');
     return user ? JSON.parse(user) : null;
 };
 

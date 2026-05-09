@@ -453,7 +453,7 @@ const Login = () => {
                           <div className="input-wrap">
                             <Lock size={16} className="input-icon" />
                             <input className="field has-eye" type={showPassword ? 'text' : 'password'} placeholder="••••••••"
-                              value={password} onChange={e => setPassword(e.target.value)} required />
+                              value={password} onChange={e => setPassword(e.target.value)} required autoComplete="off" />
                             <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)} aria-label="Mostrar/ocultar contraseña">
                               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
@@ -568,7 +568,7 @@ const Login = () => {
                     <div className="input-wrap">
                       <Lock size={16} className="input-icon" />
                       <input className="field has-eye" type={showPassword ? 'text' : 'password'} placeholder="Mínimo 6 caracteres"
-                        value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+                        value={password} onChange={e => setPassword(e.target.value)} required minLength={6} autoComplete="off" />
                       <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)} aria-label="Mostrar/ocultar contraseña">
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
