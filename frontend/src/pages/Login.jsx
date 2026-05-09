@@ -45,17 +45,52 @@ const Login = () => {
     setTheme(t => t === 'light' ? 'dark' : 'light');
   };
 
-  /* ── Iniciar sesión en AuthContext y navegar al dashboard ── */
   const redirectToApp = (user) => {
-    authLogin({
-      id: user.id || user.userId || null,
-      name: user.name || user.email,
-      email: user.email || '',
-      role: user.role || 'student',
-      method: user.method || 'email',
-      progress: user.progress || {},
-    });
-    navigate('/welcome');
+    // Activar el cierre lento
+    setIsIrisClosing(true);
+    
+    // Esperar a que la pantalla esté completamente negra (2 segundos)
+    setTimeout(() => {
+      
+      // Mostrar el contenido de CARGANDO directamente sobre el mismo fondo negro
+      setShowLoadingOverBlack(true);
+      
+      // Simular progreso de carga para que dure un rato en negro ("que duro mas")
+      let p = 0;
+      const interval = setInterval(() => {
+        p += (p < 60 ? 1.5 : p < 85 ? 1 : 0.8);
+        if (p >= 100) {
+          clearInterval(interval);
+          setSimulatedProgress(100);
+          
+          // Finaliza la carga, esperar 0.5s y desvanecer el "Cargando"
+          setTimeout(() => {
+            setShowLoadingOverBlack(false);
+            
+            // Esperar que se desvanezca por completo (600ms) para que quede la pantalla 100% negra otra vez
+            setTimeout(() => {
+              document.body.style.backgroundColor = '#000000';
+              
+              // AHORA actualizar el estado global, lo que desmontará la página
+              authLogin({
+                id: user.id || user.userId || null,
+                name: user.name || user.email,
+                email: user.email || '',
+                role: user.role || 'student',
+                method: user.method || 'email',
+                progress: user.progress || {},
+              });
+              
+              navigate('/welcome?fast=true');
+              setTimeout(() => { document.body.style.backgroundColor = ''; }, 2000);
+            }, 600); // fade out duration
+          }, 500); // hold 100% for half a second
+        } else {
+          setSimulatedProgress(Math.min(p, 100));
+        }
+      }, 40);
+
+    }, 2000); // 2 segundos exactos para que el borde tape toda la pantalla
   };
 
   const [email, setEmail] = useState('');
@@ -65,6 +100,11 @@ const Login = () => {
   const [message, setMessage] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
+  
+  /* Cinematic Transition States */
+  const [isIrisClosing, setIsIrisClosing] = useState(false);
+  const [showLoadingOverBlack, setShowLoadingOverBlack] = useState(false);
+  const [simulatedProgress, setSimulatedProgress] = useState(0);
   
   /* UX Validation States */
   const [emailValid, setEmailValid] = useState(false);
@@ -229,8 +269,7 @@ const Login = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error de autenticación');
       saveSession(data.token, data.user);
-      setMessage({ text: `¡Bienvenido ${data.user.name}! Redirigiendo…`, type: 'success' });
-      setTimeout(() => redirectToApp(data.user), 1500);
+      redirectToApp(data.user);
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
     }
@@ -266,9 +305,7 @@ const Login = () => {
           if (uRes.ok) fullUser = { ...fullUser, ...uData, method: 'face' };
         } catch { /* si falla, usar datos básicos */ }
         saveSession('face-id-session', fullUser);
-        setMessage({ text: `¡Hola ${bestMatch.name}! Redirigiendo…`, type: 'success' });
-        setMode('login');
-        setTimeout(() => redirectToApp(fullUser), 1500);
+        redirectToApp(fullUser);
       } else {
         setMessage({ text: 'Rostro no reconocido. ¿Ya registraste tu cara?', type: 'error' });
         setMode('login');
@@ -647,6 +684,71 @@ const Login = () => {
           </div>
         </div>{/* /login-card */}
       </div>{/* /login-right */}
+
+      {/* ── THE INTERNAL IRIS CLOSE (LOONEY TUNES STYLE) ── */}
+      {isIrisClosing && (
+        <motion.div
+          initial={{ borderWidth: '0vmax' }}
+          animate={{ borderWidth: '150vmax' }}
+          transition={{ duration: 2.0, ease: "easeInOut" }}
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            x: '-50%',
+            y: '-50%',
+            width: '300vmax',
+            height: '300vmax',
+            borderRadius: '50%',
+            borderColor: '#000000',
+            borderStyle: 'solid',
+            boxSizing: 'border-box',
+            zIndex: 999999,
+            pointerEvents: 'none'
+          }}
+        />
+      )}
+
+      {/* ── THE BLACK SCREEN LOADING (OVER THE IRIS) ── */}
+      <AnimatePresence>
+        {showLoadingOverBlack && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 1000000,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              color: 'white'
+            }}
+          >
+            <motion.div
+              animate={{ scale: [1, 1.08, 1], y: [0, -6, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ fontSize: '4rem', marginBottom: '1rem' }}
+            >
+              🚀
+            </motion.div>
+
+            <h2 style={{ fontWeight: 900, fontSize: '1.5rem', letterSpacing: '2px', marginBottom: '2rem' }}>
+              CARGANDO
+              <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}>.</motion.span>
+              <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}>.</motion.span>
+              <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}>.</motion.span>
+            </h2>
+
+            <div style={{ width: '200px', height: '4px', background: 'rgba(255,255,255,0.2)', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
+              <motion.div
+                style={{ height: '100%', background: '#ffffff', width: `${Math.floor(simulatedProgress)}%` }}
+              />
+              <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${Math.floor(simulatedProgress)}%`, width: '20px', background: '#ffffff', boxShadow: '0 0 12px 4px rgba(255,255,255,0.5)', transform: 'translateX(-50%)' }} />
+            </div>
+            <span style={{ marginTop: '1rem', fontWeight: 'bold' }}>{Math.floor(simulatedProgress)}%</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 };

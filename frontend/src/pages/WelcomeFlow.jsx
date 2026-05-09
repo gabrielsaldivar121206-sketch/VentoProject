@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { sounds } from '../hooks/useSounds';
 import './WelcomeFlow.css';
@@ -24,10 +24,10 @@ const FLOATING_CHARS = ['α', 'π', '∞', '♪', '✦', 'λ', '∑', '✧', '�
 
 const WelcomeFlow = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
-  const [step, setStep] = useState('loading');
+  const [step, setStep] = useState('welcome');
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [progress, setProgress] = useState(0);
 
   const isNewUser = !(user?.onboardingComplete || localStorage.getItem(`vento_onboarded_${user?.email}`));
 
@@ -37,34 +37,26 @@ const WelcomeFlow = () => {
     document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 
-  // Loading progress simulation
-  useEffect(() => {
-    if (step !== 'loading') return;
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) { clearInterval(interval); return 100; }
-        const increment = prev < 60 ? 3 : prev < 85 ? 2 : 1;
-        return Math.min(prev + increment, 100);
-      });
-    }, 40);
-    return () => clearInterval(interval);
-  }, [step]);
 
-  // Auto-advance from loading
-  useEffect(() => {
-    if (progress >= 100) {
-      const t = setTimeout(() => setStep('welcome'), 300);
-      return () => clearTimeout(t);
-    }
-  }, [progress]);
 
   // Returning users auto-redirect
   useEffect(() => {
     if (step === 'welcome' && !isNewUser) {
-      const t = setTimeout(() => navigate('/dashboard'), 3500);
+      // 5000ms for the animation to finish + 3500ms to read the welcome text
+      const t = setTimeout(() => navigate('/dashboard'), 8500);
       return () => clearTimeout(t);
     }
   }, [step, isNewUser, navigate]);
+
+  // Sound effect perfectly timed
+  useEffect(() => {
+    if (step === 'welcome') {
+      const t = setTimeout(() => {
+        try { sounds.welcomePop(); } catch (e) {}
+      }, 1700); // Delayed an extra 0.4s as requested
+      return () => clearTimeout(t);
+    }
+  }, [step]);
 
   const handleCourseSelect = (course) => {
     setSelectedCourse(course);
@@ -83,79 +75,56 @@ const WelcomeFlow = () => {
   const firstName = user?.name?.split(' ')[0] || 'Estudiante';
 
   return (
-    <div className="wf-container">
+    <div className="wf-container" style={{ background: '#000000' }}>
       {/* ── Animated background ── */}
-      <div className="wf-bg-layer">
-        <div className="wf-grid-pattern" />
-        <div className="wf-orb wf-orb1" />
-        <div className="wf-orb wf-orb2" />
-        <div className="wf-orb wf-orb3" />
-        <div className="wf-orb wf-orb4" />
-        <div className="wf-orb wf-orb5" />
-      </div>
+        <div className="wf-bg-layer">
+          <div className="wf-grid-pattern" />
+          <div className="wf-orb wf-orb1" />
+          <div className="wf-orb wf-orb2" />
+          <div className="wf-orb wf-orb3" />
+          <div className="wf-orb wf-orb4" />
+          <div className="wf-orb wf-orb5" />
+        </div>
 
-      {/* ── Floating characters ── */}
       <div className="wf-floating-chars">
-        {FLOATING_CHARS.map((ch, i) => (
-          <span key={i} className={`wf-fchar wf-fc${i}`}>{ch}</span>
-        ))}
-      </div>
+          {FLOATING_CHARS.map((ch, i) => (
+            <span key={i} className={`wf-fchar wf-fc${i}`}>{ch}</span>
+          ))}
+        </div>
 
       <AnimatePresence mode="wait">
-
-        {/* ═══════ LOADING ═══════ */}
-        {step === 'loading' && (
-          <motion.div
-            key="loading"
-            className="wf-loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.95, filter: 'blur(12px)' }}
-            transition={{ duration: 0.4, exit: { duration: 0.5 } }}
-          >
-            {/* Animated logo mark */}
-            <motion.div className="wf-logo-mark"
-              animate={{ rotate: [0, 360] }}
-              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-            >
-              <div className="wf-logo-ring" />
-            </motion.div>
-
-            <motion.div className="wf-logo-icon"
-              animate={{ scale: [1, 1.08, 1], y: [0, -6, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              🚀
-            </motion.div>
-
-            <h2 className="wf-loading-text">
-              Cargando
-              <span className="dot d1">.</span>
-              <span className="dot d2">.</span>
-              <span className="dot d3">.</span>
-            </h2>
-
-            <div className="wf-progress-track">
-              <motion.div
-                className="wf-progress-fill"
-                style={{ width: `${progress}%` }}
-              />
-              <div className="wf-progress-glow" style={{ left: `${progress}%` }} />
-            </div>
-            <span className="wf-progress-pct">{progress}%</span>
-          </motion.div>
-        )}
 
         {/* ═══════ WELCOME ═══════ */}
         {step === 'welcome' && (
           <motion.div
             key="welcome"
             className="wf-welcome"
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.1, filter: 'blur(16px)' }}
             transition={{ duration: 0.6, exit: { duration: 0.5 } }}
           >
+            {/* ── THE INTERNAL IRIS OPEN (FLAWLESS CSS BORDER) ── */}
+            <motion.div
+              initial={{ borderWidth: '150vmax' }}
+              animate={{ borderWidth: '0vmax' }}
+              transition={{ delay: 0.4, duration: 4.0, ease: "easeInOut" }}
+              style={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                x: '-50%',
+                y: '-50%',
+                width: '300vmax',
+                height: '300vmax',
+                borderRadius: '50%',
+                borderColor: '#000000',
+                borderStyle: 'solid',
+                boxSizing: 'border-box',
+                zIndex: 99999,
+                pointerEvents: 'none'
+              }}
+            />
             {/* Main title — each word animates in */}
             <div className="wf-welcome-words">
               {['¡Bienvenido', 'a', 'VentoEdu!'].map((word, wi) => (
@@ -164,13 +133,8 @@ const WelcomeFlow = () => {
                   className={`wf-word ${word === 'VentoEdu!' ? 'wf-word-brand' : ''}`}
                   initial={{ opacity: 0, y: 60, scale: 0.3, rotateX: 90 }}
                   animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-                  onAnimationStart={() => {
-                    if (wi === 0) {
-                      try { sounds.welcomePop(); } catch(e){}
-                    }
-                  }}
                   transition={{
-                    delay: wi * 0.25,
+                    delay: 1.7 + wi * 0.25,
                     type: 'spring',
                     stiffness: 180,
                     damping: 14,
@@ -186,7 +150,7 @@ const WelcomeFlow = () => {
               className="wf-welcome-sub"
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.4, duration: 0.8, ease: 'easeOut' }}
+              transition={{ delay: 1.7 + 1.4, duration: 0.8, ease: 'easeOut' }}
             >
               {isNewUser 
                 ? `${firstName}, tu aventura de aprendizaje comienza ahora ✨`
@@ -201,7 +165,7 @@ const WelcomeFlow = () => {
                 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2.0, duration: 0.5, type: 'spring', stiffness: 200 }}
+                transition={{ delay: 1.7 + 2.0, duration: 0.5, type: 'spring', stiffness: 200 }}
                 whileHover={{ scale: 1.06, boxShadow: '0 12px 35px rgba(139, 92, 246, 0.4)' }}
                 whileTap={{ scale: 0.96 }}
               >

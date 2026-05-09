@@ -3,43 +3,19 @@ import { motion } from 'framer-motion';
 
 /* ══════════════════════════════════════════════
    PAGE TRANSITION WRAPPER
-   - Wraps each route with smooth enter/exit animation
-   - Uses Framer Motion with spring physics
+   - Simple, clean fade transition.
+   - Specific complex transitions (like Iris) are 
+     handled inside their respective components.
 ══════════════════════════════════════════════ */
-
-const pageVariants = {
-  initial: {
-    opacity: 0,
-    y: 20,
-    scale: 0.98,
-  },
-  animate: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-  },
-  exit: {
-    opacity: 0,
-    y: -20,
-    scale: 0.98,
-  },
-};
-
-const pageTransition = {
-  type: 'spring',
-  stiffness: 300,
-  damping: 30,
-};
 
 const PageTransition = ({ children, className = '' }) => (
   <motion.div
-    variants={pageVariants}
-    initial="initial"
-    animate="animate"
-    exit="exit"
-    transition={pageTransition}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.3 }}
     className={className}
-    style={{ width: '100%', minHeight: '100vh' }}
+    style={{ width: '100%', height: '100%' }}
   >
     {children}
   </motion.div>
