@@ -35,6 +35,7 @@ const Login = () => {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('vento-theme', theme);
+    sessionStorage.removeItem('vento_welcomed_this_session'); // Ensure it resets before a new login
   }, [theme]);
 
   const toggleTheme = () => {
@@ -51,7 +52,7 @@ const Login = () => {
       method: user.method || 'email',
       progress: user.progress || {},
     });
-    navigate('/dashboard');
+    navigate('/welcome');
   };
 
   const [email, setEmail] = useState('');
@@ -130,7 +131,6 @@ const Login = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error con Google');
       saveSession(data.token, data.user);
-      speak('Acceso con Google exitoso. ¡Bienvenido!');
       redirectToApp(data.user);
     } catch (err) {
       setMessage({ text: err.message || 'Error con Google', type: 'error' });
@@ -203,11 +203,9 @@ const Login = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al registrar');
       setMessage({ text: '¡Cuenta creada! Ahora inicia sesión', type: 'success' });
-      speak('Cuenta creada. Ahora inicia sesión.');
       setTimeout(() => setMode('login'), 2000);
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
-      speak('Error al crear la cuenta.');
     }
     setLoading(false);
   };
@@ -226,12 +224,10 @@ const Login = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error de autenticación');
       saveSession(data.token, data.user);
-      speak('Bienvenido de nuevo.');
       setMessage({ text: `¡Bienvenido ${data.user.name}! Redirigiendo…`, type: 'success' });
       setTimeout(() => redirectToApp(data.user), 1500);
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
-      speak('Acceso denegado.');
     }
     setLoading(false);
   };
@@ -245,7 +241,6 @@ const Login = () => {
       const res = await apiFetch('/api/face-profiles');
       const data = await res.json();
       if (!res.ok || !data.profiles?.length) {
-        speak('No hay rostros registrados. Regístrate primero.');
         setMessage({ text: 'Sin perfiles faciales. Registra tu rostro.', type: 'error' });
         setMode('login');
         setLoading(false);
@@ -266,12 +261,10 @@ const Login = () => {
           if (uRes.ok) fullUser = { ...fullUser, ...uData, method: 'face' };
         } catch { /* si falla, usar datos básicos */ }
         saveSession('face-id-session', fullUser);
-        speak(`Identidad confirmada. Bienvenido, ${bestMatch.name}.`);
         setMessage({ text: `¡Hola ${bestMatch.name}! Redirigiendo…`, type: 'success' });
         setMode('login');
         setTimeout(() => redirectToApp(fullUser), 1500);
       } else {
-        speak('Rostro no reconocido. Regístrate primero.');
         setMessage({ text: 'Rostro no reconocido. ¿Ya registraste tu cara?', type: 'error' });
         setMode('login');
       }
@@ -300,7 +293,6 @@ const Login = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al guardar');
-      speak(`¡Perfecto ${faceRegName}! Tu rostro fue registrado.`);
       setMessage({ text: '¡Rostro registrado! Ya puedes usar Face ID 🎉', type: 'success' });
       setFaceRegName('');
       setFaceRegEmail('');

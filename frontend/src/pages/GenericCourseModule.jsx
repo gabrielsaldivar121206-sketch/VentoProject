@@ -13,6 +13,7 @@ import '../components/LessonTheory/LessonTheory.css';
 import '../components/MiniGames/MiniGames.css';
 import './EnglishModule.css';
 import './CourseCardV3.css';
+import './AppDashboard.css';
 
 /* ─── Generic Course Module ─────────────────────────────────────────────────
    Receives:
@@ -52,9 +53,31 @@ const GenericCourseModule = ({ courseId, courseName, courseColor, courseEmoji, l
   const [swappedExercise,  setSwappedExercise]  = useState(null);
   const [practiceMode,     setPracticeMode]     = useState(false);
 
+  // Placement flow
+  const [placement, setPlacement] = useState(() => {
+    return user?.progress?.[courseId]?.placement || localStorage.getItem(`vento_${courseId}_placement`) || null;
+  });
+
+  const handlePlacement = (level) => {
+    sounds.buttonPress();
+    setPlacement(level);
+    localStorage.setItem(`vento_${courseId}_placement`, level);
+    if (updateProgress) {
+      updateProgress(courseId, { placement: level });
+    }
+  };
+
+  const filteredUnits = React.useMemo(() => {
+    if (!lessons.units) return [];
+    if (placement === 'beginner') return lessons.units.slice(0, Math.ceil(lessons.units.length / 3)) || lessons.units;
+    if (placement === 'intermediate') return lessons.units.slice(Math.ceil(lessons.units.length / 3), Math.ceil(lessons.units.length * 2 / 3)) || lessons.units;
+    if (placement === 'advanced') return lessons.units.slice(Math.ceil(lessons.units.length * 2 / 3)) || lessons.units;
+    return lessons.units;
+  }, [lessons, placement]);
+
   useEffect(() => { setTimeout(() => setMounted(true), 100); }, []);
 
-  const level           = Math.floor(xp / 100) + 1;
+  const levelBadge      = Math.floor(xp / 100) + 1;
   const currentExercise = currentLesson?.exercises?.[exerciseIndex] || null;
   const activeExercise  = swappedExercise || currentExercise;
 
@@ -377,7 +400,8 @@ const GenericCourseModule = ({ courseId, courseName, courseColor, courseEmoji, l
         </div>
       )}
 
-      {!(currentLesson && lessonMode === 'theory') && (
+      {/* Top bar — only show if in a lesson */}
+      {currentLesson && (
         <div className="eng-topbar" style={{ borderBottomColor: `${courseColor}22` }}>
           <div className="eng-topbar-inner">
             <button className="eng-back-btn" onClick={() => {
@@ -426,29 +450,69 @@ const GenericCourseModule = ({ courseId, courseName, courseColor, courseEmoji, l
             <PracticeComponent onClose={() => setPracticeMode(false)} />
           </div>
         ) : (
-          <div className="lesson-map">
-            {/* Course header */}
-            <div className="course-module-header" style={{ borderColor:`${courseColor}30`, background:`linear-gradient(135deg,${courseColor}12,${courseColor}05)` }}>
-              <div className="cmh-icon" style={{ background:`${courseColor}20`, border:`1px solid ${courseColor}30` }}>{courseEmoji}</div>
-              <div className="cmh-info">
-                <h1 className="cmh-title" style={{ color:courseColor }}>{courseName}</h1>
-                <p className="cmh-sub">{completedLessons.length} lecciones completadas · Nivel {level}</p>
+          <div style={{ maxWidth: '1300px', margin: '0 auto', width: '100%' }}>
+            {/* Back to Home Header */}
+            <header style={{ marginBottom: '2rem', padding: '1.5rem 1.5rem 0' }}>
+              <button className="sl-back-btn" onClick={() => { sounds.navigate(); navigate('/dashboard'); }} style={{ fontFamily: 'var(--font)', fontSize: '13px', fontWeight: 600, padding: '8px 16px', borderRadius: '100px', border: '1px solid var(--border)', background: 'var(--bg-input)', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.25s' }}>
+                ← Volver al Inicio
+              </button>
+            </header>
+
+            {/* Premium Course Dashboard Hero for Generic Modules */}
+            <div className="pro-dashboard-hero" style={{ margin: '0 1.5rem 3rem' }}>
+              <div className="pdh-top-row" style={{ padding: '3rem', borderRadius: '32px', background: 'var(--bg-card-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderColor: `color-mix(in srgb, ${courseColor} 20%, transparent)` }}>
+                <div className="pdh-greeting-col" style={{ gap: '0.5rem', flex: 1 }}>
+                  <div className="pdh-time-badge" style={{ display: 'inline-flex', marginBottom: '1rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', padding: '0.4rem 1rem', borderRadius: '100px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', alignItems: 'center', gap: '0.5rem' }}>
+                    {courseEmoji} Módulo de Aprendizaje
+                  </div>
+                  <h1 className="pdh-title" style={{ fontSize: '3rem', marginBottom: '0', fontWeight: 900, color: 'var(--text)', letterSpacing: '-0.03em' }}>{courseName.split(':')[0]} <span style={{ color: courseColor }}>{courseName.split(':')[1] || ''}</span></h1>
+                  <p className="pdh-subtitle" style={{ fontSize: '1.2rem', maxWidth: '600px', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
+                    Completa lecciones, acumula experiencia y domina nuevas habilidades. <strong>¡Sube de nivel!</strong>
+                  </p>
+                  
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                    <div className="pdh-motivational-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: `color-mix(in srgb, ${courseColor} 10%, transparent)`, border: `1px solid color-mix(in srgb, ${courseColor} 30%, transparent)`, padding: '0.6rem 1.2rem', borderRadius: '100px', fontWeight: 700, fontSize: '0.95rem', color: courseColor }}>
+                      ⚡ {xp} XP Total
+                    </div>
+                    <div className="pdh-motivational-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255, 71, 87, 0.1)', border: '1px solid rgba(255, 71, 87, 0.3)', padding: '0.6rem 1.2rem', borderRadius: '100px', fontWeight: 700, fontSize: '0.95rem', color: '#ff4757' }}>
+                      🔥 Racha de {streak}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pdh-level-col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                  <div className="pdh-level-ring-container" style={{ position: 'relative', width: '140px', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg className="pdh-ring-svg" width="140" height="140" viewBox="0 0 140 140" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
+                      <circle cx="70" cy="70" r="62" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="10" />
+                      <circle cx="70" cy="70" r="62" fill="none" stroke={courseColor} strokeWidth="10" strokeDasharray="389.5" strokeDashoffset={389.5 - (389.5 * (completedLessons.length / (lessons.units.reduce((acc, u) => acc + u.lessons.length, 0)) || 0))} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease-out' }} />
+                    </svg>
+                    <div className="pdh-level-inner" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+                      <span className="pdh-lvl-num" style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--text)', lineHeight: 1 }}>{Math.floor((completedLessons.length / (lessons.units.reduce((acc, u) => acc + u.lessons.length, 0)) || 0) * 100)}%</span>
+                      <span className="pdh-lvl-label" style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '2px' }}>PROGRESO</span>
+                    </div>
+                  </div>
+                  <div className="pdh-xp-badge" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '0.3rem 0.8rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.5px', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    Nivel {level}
+                  </div>
+                </div>
               </div>
-              <div className="cmh-xp-badge" style={{ background:`${courseColor}15`, borderColor:`${courseColor}25`, color:courseColor }}>⚡ {xp} XP</div>
             </div>
 
             {/* Practice Mode button */}
             {PracticeComponent && (
-              <button className="practice-mode-btn" style={{ '--pc': courseColor }}
-                onClick={() => { sounds.buttonPress(); setPracticeMode(true); }}>
-                <span className="pmb-icon">{courseId==='chess'?'♟️':'🎹'}</span>
-                <span className="pmb-label">{courseId==='chess'?'Jugar Partida de Ajedrez':'Abrir Piano Digital'}</span>
-                <span className="pmb-arrow">→</span>
-              </button>
+              <div style={{ margin: '0 1.5rem 2rem' }}>
+                <button className="practice-mode-btn" style={{ '--pc': courseColor, width: '100%' }}
+                  onClick={() => { sounds.buttonPress(); setPracticeMode(true); }}>
+                  <span className="pmb-icon">{courseId==='chess'?'♟️':'🎹'}</span>
+                  <span className="pmb-label" style={{ flex: 1, textAlign: 'left' }}>{courseId==='chess'?'Jugar Partida Libre de Ajedrez':'Abrir Piano Digital Libre'}</span>
+                  <span className="pmb-arrow">→</span>
+                </button>
+              </div>
             )}
 
-            {lessons.units.map((unit, ui) => {
-              const color = UNIT_COLORS[ui % UNIT_COLORS.length];
+            <div className="lesson-map" style={{ padding: '0 1.5rem' }}>
+              {lessons.units.map((unit, ui) => {
+                const color = UNIT_COLORS[ui % UNIT_COLORS.length];
               const unitCompleted = unit.lessons.filter(l => completedLessons.includes(l.id)).length;
               const unitPct = Math.round((unitCompleted / unit.lessons.length) * 100);
               return (
@@ -487,6 +551,7 @@ const GenericCourseModule = ({ courseId, courseName, courseColor, courseEmoji, l
                 </div>
               );
             })}
+          </div>
           </div>
         )}
       </div>

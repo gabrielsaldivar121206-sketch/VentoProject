@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDetector } from '../hooks/useDetector.js';
 import { LETRA_ES } from '../detectorLogica.js';
 import './SignLanguageModule.css';
+import './AppDashboard.css';
 
 // ── Constantes ───────────────────────────────────────────────
 const MAX_HISTORY   = 30;
@@ -44,28 +45,44 @@ const LESSON_LETTERS = {
   abc:     ["A","B","C","D","E","F","G","H","I","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y"],
 };
 
-// ── Pantalla de inicio (diseño original VentoSign) ───────────
+// ── Pantalla de inicio (Course Dashboard) ───────────
 const SignHome = ({ onSelect, onBack }) => {
+  const { user } = useAuth();
+  
+  // Extraer datos de progreso de Sign Language
+  const prog = user?.progress?.signlanguage || {};
+  const completedVocales = prog.completedVocales || [];
+  const completedAbc = prog.completedAbc || [];
+  const uniqueCompleted = new Set([...completedVocales, ...completedAbc]).size;
+  const totalLetters = 29; // 5 vocales + 24 ABC
+  const progressPct = Math.round((uniqueCompleted / totalLetters) * 100) || 0;
+  const xp = prog.xp || 0;
+  const streak = prog.streak || 0;
+
   const MODES = [
     {
       id: "detect", icon: "🤖",
       title: "Detector Libre",
       desc: "Muestra cualquier seña frente a la cámara y el sistema la identifica en tiempo real con IA.",
-      color: "#00f2ff", badge: "KNN · TIEMPO REAL",
+      color: "var(--cyan)", badge: "IA · EN VIVO",
+      actionText: "Iniciar Cámara",
+      iconColor: "#00f2ff"
     },
     {
       id: "vocales", icon: "🅰️",
       title: "Aprende las Vocales",
-      desc: "Aprende a hacer las señas de A, E, I, O, U paso a paso con retroalimentación inmediata.",
-      color: "#a855f7", badge: "5 LETRAS · GUIADO",
-      letters: ["A","E","I","O","U"],
+      desc: "Domina las 5 vocales básicas con retroalimentación inmediata y gana XP.",
+      color: "var(--purple)", badge: "BÁSICO · 5 LETRAS",
+      actionText: "Iniciar Lección",
+      iconColor: "#ce82ff"
     },
     {
       id: "abc", icon: "📚",
-      title: "Aprende el Abecedario",
-      desc: "Recorre todo el alfabeto del lenguaje de señas desde la A hasta la Y a tu propio ritmo.",
-      color: "#22c55e", badge: "24 LETRAS · COMPLETO",
-      letters: ["A","B","C","D","E","F","G","H","I","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y"],
+      title: "El Abecedario",
+      desc: "Recorre todo el alfabeto del lenguaje de señas a tu propio ritmo.",
+      color: "var(--green)", badge: "COMPLETO · 24 LETRAS",
+      actionText: "Comenzar Ruta",
+      iconColor: "#2ed573"
     },
   ];
 
@@ -73,79 +90,104 @@ const SignHome = ({ onSelect, onBack }) => {
     <div className="sl-home">
       <div className="sl-bg-orbs">
         <div className="sl-orb sl-orb1" /><div className="sl-orb sl-orb2" /><div className="sl-orb sl-orb3" />
+        <div className="pro-grid-overlay" style={{ opacity: 0.3 }} />
       </div>
-      <div className="sl-home-inner">
-        <header className="sl-home-header">
-          <button className="sl-back-btn" onClick={onBack}>← Dashboard</button>
-          <div className="sl-brand">
-            <span className="sl-brand-icon">✋</span>
-            <h1 className="sl-brand-name">Vento<span className="sl-brand-accent">Sign</span></h1>
-          </div>
-          <div style={{width:'120px'}} />
+      
+      <div className="sl-home-inner" style={{ maxWidth: '1300px', margin: '0 auto', padding: '2rem 1.5rem', width: '100%' }}>
+        
+        {/* Topbar back button */}
+        <header style={{ marginBottom: '2rem' }}>
+          <button className="sl-back-btn" onClick={onBack}>← Volver al Inicio</button>
         </header>
 
-        <section className="sl-hero">
-          <div className="sl-hero-floating-hands">
-            {[["✋","A"],["🤟","Y"],["🤙","Shaka"],["✌️","V"],["👌","F"]].map(([emoji, letter]) => (
-              <div key={letter+emoji} className="sl-float-hand">
-                <span>{emoji}</span>
-                <span className="sl-hand-letter">{letter}</span>
+        {/* Hero HUD para el Curso */}
+        <div className="pro-dashboard-hero" style={{ marginBottom: '4rem' }}>
+          <div className="pdh-top-row" style={{ padding: '3rem', borderRadius: '32px', background: 'var(--bg-card-glass)' }}>
+            
+            <div className="pdh-greeting-col" style={{ gap: '0.5rem' }}>
+              <div className="pdh-time-badge" style={{ display: 'inline-flex', marginBottom: '1rem' }}>
+                🤟 Módulo Interactivo
               </div>
-            ))}
-          </div>
-          <p className="sl-tagline">Aprende Lenguaje de Señas con Inteligencia Artificial</p>
-          <div className="sl-hero-stats">
-            <div className="sl-hero-stat">
-              <span className="sl-hero-stat-value">24</span>
-              <span className="sl-hero-stat-label">Letras del ABC</span>
+              <h1 className="pdh-title" style={{ fontSize: '3rem', marginBottom: '0' }}>Lenguaje de <span>Señas</span></h1>
+              <p className="pdh-subtitle" style={{ fontSize: '1.2rem', maxWidth: '600px', marginTop: '0.5rem' }}>
+                Aprende a comunicarte con tus manos usando nuestra <strong>IA de detección en tiempo real</strong>. Supera los niveles y conviértete en un experto.
+              </p>
+              
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                <div className="pdh-motivational-badge" style={{ background: 'rgba(0, 242, 255, 0.1)', borderColor: 'rgba(0, 242, 255, 0.3)', color: '#00f2ff' }}>
+                  ⚡ {xp} XP en este curso
+                </div>
+                <div className="pdh-motivational-badge" style={{ background: 'rgba(255, 71, 87, 0.1)', borderColor: 'rgba(255, 71, 87, 0.3)', color: '#ff4757' }}>
+                  🔥 Racha de {streak}
+                </div>
+              </div>
             </div>
-            <div className="sl-hero-stat">
-              <span className="sl-hero-stat-value">🧠</span>
-              <span className="sl-hero-stat-label">IA en tiempo real</span>
-            </div>
-            <div className="sl-hero-stat">
-              <span className="sl-hero-stat-value">3</span>
-              <span className="sl-hero-stat-label">Modos de estudio</span>
-            </div>
-          </div>
-        </section>
 
-        <p className="sl-section-title">Elige un modo para empezar</p>
+            {/* Progress Ring del Curso */}
+            <div className="pdh-level-col">
+              <div className="pdh-level-ring-container" style={{ width: '160px', height: '160px' }}>
+                <svg className="pdh-ring-svg" width="160" height="160" viewBox="0 0 160 160">
+                  <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="12" />
+                  <circle cx="80" cy="80" r="70" fill="none" stroke="var(--cyan)" strokeWidth="12" 
+                    strokeDasharray="439.8" 
+                    strokeDashoffset={439.8 - (439.8 * progressPct) / 100} 
+                    strokeLinecap="round" transform="rotate(-90 80 80)" 
+                    style={{ transition: 'stroke-dashoffset 1s ease-out' }}
+                  />
+                </svg>
+                <div className="pdh-level-inner">
+                  <span className="pdh-lvl-num" style={{ fontSize: '2.5rem' }}>{progressPct}%</span>
+                  <span className="pdh-lvl-label">COMPLETADO</span>
+                </div>
+              </div>
+              <div className="pdh-xp-badge" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', borderColor: 'rgba(255,255,255,0.2)' }}>
+                {uniqueCompleted} / {totalLetters} Letras
+              </div>
+            </div>
 
-        <div className="sl-modes-grid">
+          </div>
+        </div>
+
+        {/* Modules Grid */}
+        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem', color: '#fff', letterSpacing: '-0.02em' }}>
+          Misiones Disponibles
+        </h2>
+
+        <div className="courses-grid-neon">
           {MODES.map(mode => (
-            <button
+            <div
               key={mode.id}
-              className="sl-mode-card"
-              style={{ '--card-accent': mode.color }}
+              className="course-card-neon"
+              style={{ '--cc': mode.color, '--ccrgb': mode.iconColor === '#00f2ff' ? '0, 242, 255' : mode.iconColor === '#ce82ff' ? '206, 130, 255' : '46, 213, 115' }}
               onClick={() => onSelect(mode.id)}
             >
-              <div className="sl-card-top-bar" />
-              <div className="sl-mc-icon-wrap">
-                <span>{mode.icon}</span>
-              </div>
-              <div className="sl-mc-badge" style={{ color: mode.color, borderColor: mode.color }}>{mode.badge}</div>
-              <h2 className="sl-mc-title">{mode.title}</h2>
-              <p className="sl-mc-desc">{mode.desc}</p>
-              {mode.letters && (
-                <div className="sl-mc-letters">
-                  {mode.letters.slice(0, 8).map(l => (
-                    <span key={l} className="sl-letter-chip">{l}</span>
-                  ))}
-                  {mode.letters.length > 8 && (
-                    <span className="sl-letter-chip sl-chip-more">+{mode.letters.length - 8}</span>
-                  )}
+              <div className="ccn-glow-bg"></div>
+              
+              <div className="ccn-top">
+                <div className="ccn-icon-wrap">
+                  <div className="ccn-icon-ring"></div>
+                  <span className="ccn-emoji">{mode.icon}</span>
                 </div>
-              )}
-              <div className="sl-mc-footer">
-                <span className="sl-mc-cta">Comenzar ahora</span>
-                <span className="sl-mc-arrow">→</span>
+                <span className="ccn-difficulty" style={{ background: `color-mix(in srgb, ${mode.iconColor} 15%, transparent)`, color: mode.iconColor, borderColor: `color-mix(in srgb, ${mode.iconColor} 30%, transparent)` }}>
+                  {mode.badge}
+                </span>
               </div>
-            </button>
+
+              <div className="ccn-content">
+                <h3 className="ccn-name">{mode.title}</h3>
+                <p className="ccn-desc">{mode.desc}</p>
+              </div>
+
+              <div className="ccn-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+                <span style={{ fontSize: '1.1rem', fontWeight: 800, color: mode.iconColor }}>{mode.actionText}</span>
+                <button className="ccn-play-btn" style={{ background: mode.iconColor, width: '40px', height: '40px' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+              </div>
+            </div>
           ))}
         </div>
 
-        <p className="sl-footer-text">Powered by MediaPipe · Clasificador KNN personalizado</p>
       </div>
     </div>
   );

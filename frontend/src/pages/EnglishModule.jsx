@@ -9,6 +9,7 @@ import ExercisePicker from '../components/ExercisePicker/ExercisePicker';
 import '../components/LessonTheory/LessonTheory.css';
 import '../components/MiniGames/MiniGames.css';
 import './EnglishModule.css';
+import './AppDashboard.css';
 
 const API_BASE = 'http://localhost:5000';
 const UNIT_COLORS = ['#58cc02', '#1cb0f6', '#ce82ff', '#ff9600', '#ff4b4b'];
@@ -56,11 +57,31 @@ const EnglishModule = () => {
   const [pronRecording, setPronRecording] = useState(false);
   const [pronResult, setPronResult] = useState(null);
   const [pronScore, setPronScore] = useState(null);
-  // Exercise mode: 'picker' | 'exercise'
+  // Placement flow
+  const [placement, setPlacement] = useState(() => {
+    return user?.progress?.english?.placement || localStorage.getItem('vento_english_placement') || null;
+  });
   const [exerciseMode, setExerciseMode] = useState('picker');
 
+  const handlePlacement = (level) => {
+    sounds.buttonPress();
+    setPlacement(level);
+    localStorage.setItem('vento_english_placement', level);
+    if (updateProgress) {
+      updateProgress('english', { placement: level });
+    }
+  };
+
+  const filteredUnits = React.useMemo(() => {
+    if (!lessons.units) return [];
+    if (placement === 'beginner') return lessons.units.slice(0, 2);
+    if (placement === 'intermediate') return lessons.units.slice(2, 4);
+    if (placement === 'advanced') return lessons.units.slice(4, 5);
+    return lessons.units;
+  }, [lessons, placement]);
+
   const recognitionRef = useRef(null);
-  const level = Math.floor(xp / 100) + 1;
+  const levelBadge = Math.floor(xp / 100) + 1;
   const currentExercise = currentLesson?.exercises?.[exerciseIndex] || null;
 
   // Ejercicio alternativo cuando el usuario no tiene micrófono
@@ -731,8 +752,8 @@ const EnglishModule = () => {
         </div>
       )}
 
-       {/* Top bar — only show during exercises */}
-       {!(currentLesson && lessonMode === 'theory') && (
+       {/* Top bar — only show if in a lesson */}
+       {currentLesson && (
          <div className="eng-topbar">
            <div className="eng-topbar-inner">
              <button className="eng-back-btn" onClick={() => {
@@ -811,23 +832,124 @@ const EnglishModule = () => {
                </>
              )}
            </div>
+         ) : !placement ? (
+          <div style={{ maxWidth: '800px', margin: '4rem auto', padding: '2rem', textAlign: 'center' }}>
+            <h1 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1rem', color: 'var(--text)', letterSpacing: '-0.03em' }}>
+              ¿Cuál es tu nivel de <span style={{ color: 'var(--blue)' }}>Inglés?</span>
+            </h1>
+            <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '3rem' }}>
+              Personalizaremos tu curso para darte la mejor experiencia.
+            </p>
+
+            <div style={{ display: 'grid', gap: '1.5rem' }}>
+              <button className="course-card-neon" style={{ '--cc': 'var(--blue)', '--ccrgb': '30,144,255', textAlign: 'left', padding: '2rem' }}
+                onClick={() => handlePlacement('beginner')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                  <div className="ccn-icon-wrap" style={{ width: '80px', height: '80px' }}>
+                    <div className="ccn-icon-ring"></div>
+                    <span className="ccn-emoji">🐣</span>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.5rem', color: 'var(--text)' }}>Principiante <span style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>(A1-A2)</span></h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', margin: 0 }}>Empieza desde cero con lo básico y construye una base sólida.</p>
+                  </div>
+                </div>
+              </button>
+              
+              <button className="course-card-neon" style={{ '--cc': '#ce82ff', '--ccrgb': '206,130,255', textAlign: 'left', padding: '2rem' }}
+                onClick={() => handlePlacement('intermediate')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                  <div className="ccn-icon-wrap" style={{ width: '80px', height: '80px' }}>
+                    <div className="ccn-icon-ring"></div>
+                    <span className="ccn-emoji">🚀</span>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.5rem', color: 'var(--text)' }}>Intermedio <span style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>(B1-B2)</span></h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', margin: 0 }}>Ya sé algo de inglés, quiero mejorar mi fluidez y vocabulario.</p>
+                  </div>
+                </div>
+              </button>
+              
+              <button className="course-card-neon" style={{ '--cc': '#ff4757', '--ccrgb': '255,71,87', textAlign: 'left', padding: '2rem' }}
+                onClick={() => handlePlacement('advanced')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                  <div className="ccn-icon-wrap" style={{ width: '80px', height: '80px' }}>
+                    <div className="ccn-icon-ring"></div>
+                    <span className="ccn-emoji">👑</span>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.5rem', color: 'var(--text)' }}>Avanzado <span style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>(C1-C2)</span></h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', margin: 0 }}>Quiero perfeccionar mi gramática y retar mis habilidades.</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
          ) : (
-          <>
+          <div style={{ maxWidth: '1300px', margin: '0 auto', width: '100%' }}>
+            {/* Back to Home Header */}
+            <header style={{ marginBottom: '2rem', padding: '1.5rem 1.5rem 0' }}>
+              <button className="sl-back-btn" onClick={() => { sounds.navigate(); navigate('/dashboard'); }} style={{ fontFamily: 'var(--font)', fontSize: '13px', fontWeight: 600, padding: '8px 16px', borderRadius: '100px', border: '1px solid var(--border)', background: 'var(--bg-input)', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.25s' }}>
+                ← Volver al Inicio
+              </button>
+            </header>
+
+            {/* Premium Course Dashboard Hero for English */}
+            <div className="pro-dashboard-hero" style={{ margin: '0 1.5rem 3rem' }}>
+              <div className="pdh-top-row" style={{ padding: '3rem', borderRadius: '32px', background: 'var(--bg-card-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="pdh-greeting-col" style={{ gap: '0.5rem', flex: 1 }}>
+                  <div className="pdh-time-badge" style={{ display: 'inline-flex', marginBottom: '1rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', padding: '0.4rem 1rem', borderRadius: '100px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', alignItems: 'center', gap: '0.5rem' }}>
+                    🇬🇧 Módulo de Idiomas
+                  </div>
+                  <h1 className="pdh-title" style={{ fontSize: '3rem', marginBottom: '0', fontWeight: 900, color: 'var(--text)', letterSpacing: '-0.03em' }}>Inglés <span>Premium</span></h1>
+                  <p className="pdh-subtitle" style={{ fontSize: '1.2rem', maxWidth: '600px', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
+                    Domina el idioma con lecciones interactivas, práctica de pronunciación con IA y juegos. <strong>¡Sube de nivel!</strong>
+                  </p>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+                    <div className="pdh-motivational-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(30, 144, 255, 0.1)', border: '1px solid rgba(30, 144, 255, 0.3)', padding: '0.6rem 1.2rem', borderRadius: '100px', fontWeight: 700, fontSize: '0.95rem', color: '#1e90ff' }}>
+                      ⚡ {xp} XP en Inglés
+                    </div>
+                    <div className="pdh-motivational-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255, 71, 87, 0.1)', border: '1px solid rgba(255, 71, 87, 0.3)', padding: '0.6rem 1.2rem', borderRadius: '100px', fontWeight: 700, fontSize: '0.95rem', color: '#ff4757' }}>
+                      🔥 Racha de {streak}
+                    </div>
+                    <button className="pdh-change-level-btn" onClick={() => { sounds.buttonPress(); setPlacement(null); localStorage.removeItem('vento_english_placement'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.2)', padding: '0.6rem 1.2rem', borderRadius: '100px', fontWeight: 700, fontSize: '0.95rem', color: 'var(--text)', cursor: 'pointer', transition: 'all 0.2s' }}>
+                      🔄 Cambiar Nivel
+                    </button>
+                  </div>
+                </div>
+                <div className="pdh-level-col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                  <div className="pdh-level-ring-container" style={{ position: 'relative', width: '140px', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg className="pdh-ring-svg" width="140" height="140" viewBox="0 0 140 140" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
+                      <circle cx="70" cy="70" r="62" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="10" />
+                      <circle cx="70" cy="70" r="62" fill="none" stroke="var(--blue)" strokeWidth="10" strokeDasharray="389.5" strokeDashoffset={389.5 - (389.5 * (completedLessons.length / (filteredUnits.reduce((acc, u) => acc + u.lessons.length, 0)) || 0))} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease-out' }} />
+                    </svg>
+                    <div className="pdh-level-inner" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+                      <span className="pdh-lvl-num" style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--text)', lineHeight: 1 }}>{Math.floor((completedLessons.length / (filteredUnits.reduce((acc, u) => acc + u.lessons.length, 0)) || 0) * 100)}%</span>
+                      <span className="pdh-lvl-label" style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '2px' }}>PROGRESO</span>
+                    </div>
+                  </div>
+                  <div className="pdh-xp-badge" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '0.3rem 0.8rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.5px', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    Nivel {levelBadge}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Tab switcher */}
-            <div className="eng-tabs">
+            <div className="eng-tabs" style={{ margin: '0 1.5rem 2rem' }}>
               <button className={`eng-tab ${activeTab === 'levels' ? 'active' : ''}`}
                 onClick={() => { sounds.click(); setActiveTab('levels'); setPronPhrase(null); }}>
-                📚 Levels
+                📚 Misiones
               </button>
               <button className={`eng-tab ${activeTab === 'pronunciation' ? 'active' : ''}`}
                 onClick={() => { sounds.click(); setActiveTab('pronunciation'); }}>
-                🎤 Pronunciation
+                🎤 Pronunciación (IA)
               </button>
             </div>
 
             {activeTab === 'levels' ? (
               <div className="lesson-map">
-                {lessons.units.map((unit, ui) => {
+                {filteredUnits.map((unit, ui) => {
                   const color = UNIT_COLORS[ui % UNIT_COLORS.length];
                   const unitCompleted = unit.lessons.filter(l => completedLessons.includes(l.id)).length;
                   const unitPct = Math.round((unitCompleted / unit.lessons.length) * 100);
@@ -965,7 +1087,7 @@ const EnglishModule = () => {
                 )}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 

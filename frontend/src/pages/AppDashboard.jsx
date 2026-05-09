@@ -82,7 +82,7 @@ const AppDashboard = () => {
 
   useEffect(() => { 
     setTimeout(() => setMounted(true), 100); 
-    
+
     // Calculate Time-based Greeting
     const hour = new Date().getHours();
     if (hour < 12) {

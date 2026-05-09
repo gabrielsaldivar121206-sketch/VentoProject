@@ -39,36 +39,6 @@ export const AuthProvider = ({ children }) => {
     };
     setUser(session);
 
-    // Voice greeting — pick best Spanish voice
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const greeting = userData.role === 'admin'
-        ? `Bienvenido administrador ${userData.name}. Acceso total concedido.`
-        : `¡Hola ${userData.name}! ¡Bienvenido de vuelta a VentoEdu! ¡Es hora de aprender!`;
-        
-      const speak = () => {
-        const utterance = new SpeechSynthesisUtterance(greeting);
-        // Prevenir bug de Chrome que corta el audio por Garbage Collection
-        window._ventoUtterance = utterance; 
-        
-        utterance.lang = 'es-ES';
-        utterance.pitch = 1.1;
-        utterance.rate = 0.95;
-        utterance.volume = 1;
-        const voices = window.speechSynthesis.getVoices();
-        const preferred = ['Google español', 'Microsoft Sabina', 'Paulina', 'Jorge', 'Monica'];
-        let best = null;
-        for (const name of preferred) {
-          best = voices.find(v => v.name.includes(name));
-          if (best) break;
-        }
-        if (!best) best = voices.find(v => v.lang.startsWith('es'));
-        if (best) utterance.voice = best;
-        window.speechSynthesis.speak(utterance);
-      };
-      setTimeout(speak, 400);
-    }
-
     return session;
   }, []);
 
@@ -78,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('vento_token');
     localStorage.removeItem('vento_user');
+    sessionStorage.removeItem('vento_welcomed_this_session');
   }, []);
 
   // ── Guardar progreso (local + Firebase vía Node.js) ────────────────────────

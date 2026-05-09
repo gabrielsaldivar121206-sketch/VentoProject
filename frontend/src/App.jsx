@@ -6,6 +6,7 @@ import { ToastProvider } from './context/ToastContext';
 import OfflineIndicator from './components/OfflineIndicator';
 import PageTransition from './components/PageTransition';
 import Login from './pages/Login';
+import WelcomeFlow from './pages/WelcomeFlow';
 import AppDashboard from './pages/AppDashboard';
 import EnglishModule from './pages/EnglishModule';
 import MusicModule from './pages/MusicModule';
@@ -23,7 +24,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated) return <Navigate to="/welcome" replace />;
   return children;
 };
 
@@ -38,6 +39,11 @@ const AnimatedRoutes = () => {
           <PublicRoute>
             <PageTransition><Login /></PageTransition>
           </PublicRoute>
+        } />
+        <Route path="/welcome" element={
+          <ProtectedRoute>
+            <PageTransition><WelcomeFlow /></PageTransition>
+          </ProtectedRoute>
         } />
         <Route path="/dashboard" element={
           <ProtectedRoute>
