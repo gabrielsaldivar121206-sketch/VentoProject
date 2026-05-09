@@ -69,7 +69,8 @@ const Login = () => {
             
             // Esperar que se desvanezca por completo (600ms) para que quede la pantalla 100% negra otra vez
             setTimeout(() => {
-              document.body.style.backgroundColor = '#000000';
+              const irisColor = theme === 'dark' ? '#0f0f14' : '#faf9ff';
+              document.body.style.backgroundColor = irisColor;
               
               // AHORA actualizar el estado global, lo que desmontará la página
               authLogin({
@@ -700,7 +701,7 @@ const Login = () => {
             width: '300vmax',
             height: '300vmax',
             borderRadius: '50%',
-            borderColor: '#000000',
+            borderColor: theme === 'dark' ? '#0f0f14' : '#faf9ff',
             borderStyle: 'solid',
             boxSizing: 'border-box',
             zIndex: 999999,
@@ -720,31 +721,69 @@ const Login = () => {
             style={{
               position: 'fixed', inset: 0, zIndex: 1000000,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              color: 'white'
+              color: 'white',
+              background: theme === 'dark' ? '#0f0f14' : '#faf9ff'
             }}
           >
+            {/* Rocket emoji */}
             <motion.div
-              animate={{ scale: [1, 1.08, 1], y: [0, -6, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              style={{ fontSize: '4rem', marginBottom: '1rem' }}
+              animate={{ scale: [1, 1.12, 1], y: [0, -8, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ fontSize: '3.5rem', marginBottom: '1.5rem', filter: 'drop-shadow(0 4px 15px rgba(139,92,246,0.25))' }}
             >
               🚀
             </motion.div>
 
-            <h2 style={{ fontWeight: 900, fontSize: '1.5rem', letterSpacing: '2px', marginBottom: '2rem' }}>
+            {/* Text */}
+            <h2 style={{
+              fontFamily: "'Quicksand', 'Segoe UI', sans-serif",
+              fontWeight: 800,
+              fontSize: '1.15rem',
+              letterSpacing: '3px',
+              marginBottom: '2rem',
+              color: theme === 'dark' ? '#a78bfa' : '#7c3aed'
+            }}>
               CARGANDO
               <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}>.</motion.span>
               <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}>.</motion.span>
               <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}>.</motion.span>
             </h2>
 
-            <div style={{ width: '200px', height: '4px', background: 'rgba(255,255,255,0.2)', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
+            {/* Progress bar */}
+            <div style={{
+              width: '220px', height: '5px',
+              background: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(139,92,246,0.1)',
+              borderRadius: '10px', position: 'relative', overflow: 'visible'
+            }}>
               <motion.div
-                style={{ height: '100%', background: '#ffffff', width: `${Math.floor(simulatedProgress)}%` }}
+                style={{
+                  height: '100%',
+                  background: 'linear-gradient(90deg, #7c3aed, #a78bfa, #60a5fa)',
+                  borderRadius: '10px',
+                  width: `${Math.floor(simulatedProgress)}%`,
+                  transition: 'width 0.15s ease-out'
+                }}
               />
-              <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${Math.floor(simulatedProgress)}%`, width: '20px', background: '#ffffff', boxShadow: '0 0 12px 4px rgba(255,255,255,0.5)', transform: 'translateX(-50%)' }} />
+              <div style={{
+                position: 'absolute', top: '-4px',
+                left: `${Math.floor(simulatedProgress)}%`,
+                width: '12px', height: '12px', borderRadius: '50%',
+                background: '#a78bfa',
+                boxShadow: '0 0 12px 4px rgba(139,92,246,0.35)',
+                transform: 'translateX(-50%)',
+                transition: 'left 0.15s ease-out'
+              }} />
             </div>
-            <span style={{ marginTop: '1rem', fontWeight: 'bold' }}>{Math.floor(simulatedProgress)}%</span>
+            <span style={{
+              marginTop: '0.7rem',
+              fontFamily: "'Quicksand', 'Segoe UI', sans-serif",
+              fontWeight: 700,
+              fontSize: '0.8rem',
+              letterSpacing: '1px',
+              color: theme === 'dark' ? '#a78bfa' : '#7c3aed'
+            }}>
+              {Math.floor(simulatedProgress)}%
+            </span>
           </motion.div>
         )}
       </AnimatePresence>

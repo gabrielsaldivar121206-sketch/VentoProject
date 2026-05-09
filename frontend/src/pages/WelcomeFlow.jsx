@@ -31,11 +31,13 @@ const WelcomeFlow = () => {
 
   const isNewUser = !(user?.onboardingComplete || localStorage.getItem(`vento_onboarded_${user?.email}`));
 
-  // Apply theme
+  // Read & apply the user's saved theme
+  const savedTheme = localStorage.getItem('vento-theme') || 'light';
+  const isDark = savedTheme === 'dark';
+
   useEffect(() => {
-    const savedTheme = localStorage.getItem('vento-theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-  }, []);
+  }, [savedTheme]);
 
 
 
@@ -75,7 +77,7 @@ const WelcomeFlow = () => {
   const firstName = user?.name?.split(' ')[0] || 'Estudiante';
 
   return (
-    <div className="wf-container" style={{ background: '#000000' }}>
+    <div className="wf-container">
       {/* ── Animated background ── */}
         <div className="wf-bg-layer">
           <div className="wf-grid-pattern" />
@@ -118,7 +120,7 @@ const WelcomeFlow = () => {
                 width: '300vmax',
                 height: '300vmax',
                 borderRadius: '50%',
-                borderColor: '#000000',
+                borderColor: isDark ? '#0f0f14' : '#faf9ff',
                 borderStyle: 'solid',
                 boxSizing: 'border-box',
                 zIndex: 99999,
