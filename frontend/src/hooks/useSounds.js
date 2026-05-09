@@ -297,6 +297,18 @@ export const sounds = {
     playPluck(196.0, 0.09, 0);     // G3
     playPluck(261.6, 0.09, 0.12);  // C4 — resolves upward
   },
+
+  /* ── Unlock AudioContext for Mobile ── */
+  unlock: () => {
+    const ctx = getCtx();
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    g.gain.value = 0;
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.001);
+  },
 };
 
 /* ── Premium TTS voice selector (fix: async voice loading in Chrome) ── */

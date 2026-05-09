@@ -11,6 +11,7 @@ import * as faceapi from 'face-api.js';
 import FaceScanner from '../components/FaceScanner';
 import { apiFetch, saveSession, GOOGLE_CLIENT_ID } from '../config/api';
 import { useAuth } from '../context/AuthContext';
+import { sounds } from '../hooks/useSounds';
 import './Login.css';
 
 /* ─── Umbral de reconocimiento facial ─── */
@@ -194,6 +195,7 @@ const Login = () => {
   ══════════════════════════════════════════════ */
   const handleRegister = async (e) => {
     e.preventDefault();
+    try { sounds.unlock(); } catch (e) {}
     setLoading(true);
     try {
       const res = await apiFetch('/api/register', {
@@ -215,6 +217,7 @@ const Login = () => {
   ══════════════════════════════════════════════ */
   const handleLogin = async (e) => {
     e.preventDefault();
+    try { sounds.unlock(); } catch (e) {}
     setLoading(true);
     try {
       const res = await apiFetch('/api/login', {
@@ -453,7 +456,8 @@ const Login = () => {
                           <div className="input-wrap">
                             <Lock size={16} className="input-icon" />
                             <input className="field has-eye" type={showPassword ? 'text' : 'password'} placeholder="••••••••"
-                              value={password} onChange={e => setPassword(e.target.value)} required autoComplete="off" />
+                              value={password} onChange={e => setPassword(e.target.value)} required 
+                              autoComplete="current-password" autoCorrect="off" autoCapitalize="none" spellCheck="false" />
                             <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)} aria-label="Mostrar/ocultar contraseña">
                               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
@@ -568,7 +572,8 @@ const Login = () => {
                     <div className="input-wrap">
                       <Lock size={16} className="input-icon" />
                       <input className="field has-eye" type={showPassword ? 'text' : 'password'} placeholder="Mínimo 6 caracteres"
-                        value={password} onChange={e => setPassword(e.target.value)} required minLength={6} autoComplete="off" />
+                        value={password} onChange={e => setPassword(e.target.value)} required minLength={6} 
+                        autoComplete="current-password" autoCorrect="off" autoCapitalize="none" spellCheck="false" />
                       <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)} aria-label="Mostrar/ocultar contraseña">
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
