@@ -455,9 +455,10 @@ const Login = () => {
                           <label className="form-label">Contraseña</label>
                           <div className="input-wrap">
                             <Lock size={16} className="input-icon" />
-                            <input className="field has-eye" type={showPassword ? 'text' : 'password'} placeholder="••••••••"
+                            <input className="field has-eye" type="text" placeholder="••••••••"
+                              style={!showPassword ? { WebkitTextSecurity: 'disc' } : {}}
                               value={password} onChange={e => setPassword(e.target.value)} required 
-                              autoComplete="current-password" autoCorrect="off" autoCapitalize="none" spellCheck="false" />
+                              autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" />
                             <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)} aria-label="Mostrar/ocultar contraseña">
                               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
@@ -571,9 +572,10 @@ const Login = () => {
                     <label className="form-label">Contraseña</label>
                     <div className="input-wrap">
                       <Lock size={16} className="input-icon" />
-                      <input className="field has-eye" type={showPassword ? 'text' : 'password'} placeholder="Mínimo 6 caracteres"
+                      <input className="field has-eye" type="text" placeholder="Mínimo 6 caracteres"
+                        style={!showPassword ? { WebkitTextSecurity: 'disc' } : {}}
                         value={password} onChange={e => setPassword(e.target.value)} required minLength={6} 
-                        autoComplete="current-password" autoCorrect="off" autoCapitalize="none" spellCheck="false" />
+                        autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" />
                       <button type="button" className="input-eye" onClick={() => setShowPassword(s => !s)} aria-label="Mostrar/ocultar contraseña">
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
