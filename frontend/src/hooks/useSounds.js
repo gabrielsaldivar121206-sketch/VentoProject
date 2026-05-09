@@ -76,6 +76,43 @@ const playNoise = (dur, vol = 0.08, filterFreq = 5000) => {
   src.start();
 };
 
+/* Plucked string — simulates guitar/harp using layered harmonics with fast decay */
+const playPluck = (freq, vol = 0.12, delay = 0) => {
+  const ctx = getCtx();
+  const t = ctx.currentTime + delay;
+  const harmonics = [
+    { ratio: 1,   amp: 1.0,  dur: 1.0  },  // fundamental
+    { ratio: 2,   amp: 0.35, dur: 0.6  },  // octave
+    { ratio: 3,   amp: 0.15, dur: 0.4  },  // fifth
+    { ratio: 4,   amp: 0.06, dur: 0.3  },  // 2nd octave
+  ];
+  harmonics.forEach(h => {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq * h.ratio, t);
+    const amplitude = vol * h.amp;
+    // Fast attack, natural decay like a real string
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(amplitude, t + 0.003);
+    g.gain.exponentialRampToValueAtTime(amplitude * 0.6, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, t + h.dur);
+    osc.connect(g);
+    if (reverbNode) {
+      const dry = ctx.createGain(); dry.gain.value = 0.6;
+      const wet = ctx.createGain(); wet.gain.value = 0.4;
+      g.connect(dry); g.connect(wet);
+      dry.connect(ctx.destination);
+      wet.connect(reverbNode);
+      reverbNode.connect(ctx.destination);
+    } else {
+      g.connect(ctx.destination);
+    }
+    osc.start(t);
+    osc.stop(t + h.dur + 0.05);
+  });
+};
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    PREMIUM SOUND LIBRARY
    ═══════════════════════════════════════════════════════════════════════════════ */
@@ -238,6 +275,26 @@ export const sounds = {
     playTone(1100, 0.1, 'sine', 0.15, 0.08, true);
     playTone(1320, 0.15, 'sine', 0.12, 0.16, true);
     playNoise(0.04, 0.02, 8000);
+  },
+
+  /* ── Welcome Pop — Warm guitar arpeggio (C Major 7, low register) ── */
+  welcomePop: () => {
+    // Warm ascending arpeggio: C3 → E3 → G3 + B3 (CMaj7, low & cozy)
+    playPluck(130.8, 0.10, 0);      // C3  — "¡Bienvenido" (deep warm)
+    playPluck(164.8, 0.10, 0.25);   // E3  — "a"
+    playPluck(196.0, 0.10, 0.50);   // G3  — "VentoEdu!"
+    playPluck(246.9, 0.06, 0.55);   // B3  — soft sparkle
+  },
+
+  /* ── Soft Pluck — Single warm tap for clicks/navigation ── */
+  softPluck: () => {
+    playPluck(196.0, 0.08, 0);  // G3 — gentle single note
+  },
+
+  /* ── Confirm Pluck — Warm ascending pair for confirmations ── */
+  confirmPluck: () => {
+    playPluck(196.0, 0.09, 0);     // G3
+    playPluck(261.6, 0.09, 0.12);  // C4 — resolves upward
   },
 };
 
