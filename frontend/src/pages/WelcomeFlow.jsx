@@ -67,19 +67,18 @@ const WelcomeFlow = () => {
 
   const handleLevelSelect = (level) => {
     try {
-      if (user?.email) {
-        localStorage.setItem(`vento_onboarded_${user.email}`, 'true');
-        
-        // Save course + level
-        const courseEntry = { courseId: selectedCourse.id, level: level.id, addedAt: Date.now() };
-        const existing = JSON.parse(localStorage.getItem(`vento_courses_${user.email}`) || '[]');
-        const filtered = existing.filter(c => c.courseId !== selectedCourse.id);
-        filtered.push(courseEntry);
-        localStorage.setItem(`vento_courses_${user.email}`, JSON.stringify(filtered));
-        localStorage.setItem(`vento_active_course_${user.email}`, selectedCourse.id);
-        // Also set the module-specific placement key so modules skip their own placement screens
-        localStorage.setItem(`vento_${selectedCourse.id}_placement`, level.id);
-      }
+      const emailKey = user?.email || '';
+      localStorage.setItem(`vento_onboarded_${emailKey}`, 'true');
+      
+      // Save course + level
+      const courseEntry = { courseId: selectedCourse.id, level: level.id, addedAt: Date.now() };
+      const existing = JSON.parse(localStorage.getItem(`vento_courses_${emailKey}`) || '[]');
+      const filtered = existing.filter(c => c.courseId !== selectedCourse.id);
+      filtered.push(courseEntry);
+      localStorage.setItem(`vento_courses_${emailKey}`, JSON.stringify(filtered));
+      localStorage.setItem(`vento_active_course_${emailKey}`, selectedCourse.id);
+      // Also set the module-specific placement key so modules skip their own placement screens
+      localStorage.setItem(`vento_${selectedCourse.id}_placement`, level.id);
     } catch (e) {}
     setTimeout(() => navigate('/dashboard'), 500);
   };
