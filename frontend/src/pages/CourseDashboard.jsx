@@ -187,6 +187,7 @@ const CourseDashboard = () => {
   const [uCourses, setUCourses] = useState(()=>getUserCourses(email));
   const [activeId, setActiveId] = useState(()=>getActiveCourse(email));
   const [showModal, setShowModal] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [openLesson, setOpenLesson] = useState(null);
   const [completedLessons, setCompletedLessons] = useState(()=>getCompleted(email,activeId));
   const [detectorLesson, setDetectorLesson] = useState(null);
@@ -209,16 +210,43 @@ const CourseDashboard = () => {
 
   // ── Lesson Detail View ──
   if (openLesson) {
+    // Generate dummy sub-lessons based on the active course
+    const subLessons = [
+      { id: 'theory', title: 'Teoría', desc: 'Aprende los conceptos básicos', icon: '📚' },
+      { id: 'practice', title: 'Práctica', desc: 'Aplica lo aprendido', icon: activeId==='music'?'🎵':activeId==='math'?'🧮':activeId==='chess'?'♟️':'🧠' },
+      { id: 'quiz', title: 'Quiz Final', desc: 'Demuestra tu conocimiento', icon: '🏆' },
+    ];
+    
     return (
       <div className="cdb-root" style={{'--cc':course.color}}>
         <div className="cdb-bg"><div className="cdb-orb cdb-orb1" style={{background:course.color}}/><div className="cdb-orb cdb-orb2"/><div className="cdb-orb cdb-orb3"/><div className="cdb-grid-pattern"/></div>
         <div className="cdb-main">
-          <div className="cdb-lesson-view">
-            <div className="cdb-lesson-view-header">
+          <div className="cdb-lesson-view-container">
+            <div className="cdb-lesson-view-header-rich">
               <h2 className="cdb-lesson-view-title">{openLesson.icon} {openLesson.title}</h2>
               <button className="cdb-lesson-back" onClick={()=>setOpenLesson(null)}>← Volver</button>
             </div>
-            <div className="cdb-lesson-content" dangerouslySetInnerHTML={{__html: openLesson.content}} />
+            
+            {/* The Winding Path inside the lesson view */}
+            <div className="cdb-roadmap-path" style={{ marginTop: '2rem' }}>
+              {subLessons.map((step, i) => {
+                 const isMobile = window.innerWidth <= 650;
+                 const offset = isMobile ? 0 : Math.sin(i * 1.5) * 100;
+                 return (
+                   <div className="cdb-node-wrapper" key={step.id} style={{ '--offset': `${offset}px` }}>
+                     {i > 0 && <svg className="cdb-path-line" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M50,0 Q50,50 50,100" vectorEffect="non-scaling-stroke" /></svg>}
+                     <motion.button className="cdb-lesson-node" whileHover={{scale:1.08}} whileTap={{scale:0.92}}>
+                        <span className="cdb-node-icon">{step.icon}</span>
+                        <div className="cdb-node-tooltip">
+                          <strong>{step.title}</strong>
+                          <span>{step.desc}</span>
+                        </div>
+                     </motion.button>
+                   </div>
+                 );
+              })}
+            </div>
+
             <div style={{marginTop:'2rem',textAlign:'center'}}>
               <button className="cdb-confirm-btn" style={{maxWidth:'300px'}} onClick={()=>handleComplete(openLesson.id)}>
                 ✓ Completar lección (+{openLesson.xp} XP)
@@ -268,11 +296,68 @@ const CourseDashboard = () => {
         <div className="cdb-header-right">
           <button className="cdb-icon-btn" onClick={()=>setTheme(t=>t==='light'?'dark':'light')}>{theme==='light'?'🌙':'☀️'}</button>
           <button className="cdb-icon-btn" onClick={()=>setShowModal(true)}>📚</button>
-          <div className="cdb-avatar" onClick={()=>{logout();navigate('/');}} title="Cerrar sesión">{firstName.charAt(0).toUpperCase()}</div>
+          <div className="cdb-avatar-wrap" style={{position: 'relative'}}>
+            <div className="cdb-avatar" onClick={()=>setShowProfileMenu(!showProfileMenu)}>
+              {firstName.charAt(0).toUpperCase()}
+            </div>
+            <AnimatePresence>
+              {showProfileMenu && (
+                <motion.div 
+                  className="cdb-profile-dropdown"
+                  initial={{opacity:0, y:10, scale:0.95}}
+                  animate={{opacity:1, y:0, scale:1}}
+                  exit={{opacity:0, y:10, scale:0.95}}
+                >
+                  <div className="cdb-pd-header">
+                    <strong>{user?.name || 'Estudiante'}</strong>
+                    <span>{user?.email || 'Invitado'}</span>
+                  </div>
+                  <div className="cdb-pd-actions">
+                    <button className="cdb-pd-btn" onClick={()=>{alert('Configuración en desarrollo'); setShowProfileMenu(false);}}>⚙️ Configuración</button>
+                    <button className="cdb-pd-btn cdb-pd-logout" onClick={()=>{logout();navigate('/');}}>🚪 Cerrar Sesión</button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </nav>
 
       <main className="cdb-main">
+        <div className="cdb-layout">
+          {/* Sidebar */}
+          <aside className="cdb-sidebar">
+            <div className="cdb-sidebar-widget cdb-profile-widget">
+              <div className="cdb-avatar-large">{firstName.charAt(0).toUpperCase()}</div>
+              <h3 className="cdb-profile-name">{firstName}</h3>
+              <p className="cdb-profile-role">Estudiante Estrella</p>
+              <div className="cdb-profile-stats">
+                <div className="cdb-p-stat"><span className="cdb-p-icon">⚡</span><div><strong>{completedLessons.length * 15}</strong><span>XP Total</span></div></div>
+                <div className="cdb-p-stat"><span className="cdb-p-icon">🔥</span><div><strong>{completedLessons.length}</strong><span>Racha</span></div></div>
+              </div>
+            </div>
+
+            <div className="cdb-sidebar-widget cdb-quests-widget">
+              <h4 className="cdb-quests-title">🚀 Misiones de Hoy</h4>
+              <div className="cdb-quest">
+                <div className="cdb-quest-icon">🔥</div>
+                <div className="cdb-quest-info">
+                  <p>Completa 1 lección</p>
+                  <div className="cdb-progress-bar"><div className="cdb-progress-fill" style={{width: completedLessons.length > 0 ? '100%' : '0%'}}></div></div>
+                </div>
+              </div>
+              <div className="cdb-quest">
+                <div className="cdb-quest-icon">⭐</div>
+                <div className="cdb-quest-info">
+                  <p>Gana 50 XP</p>
+                  <div className="cdb-progress-bar"><div className="cdb-progress-fill" style={{width: Math.min((completedLessons.length * 15 / 50) * 100, 100) + '%'}}></div></div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Right Content */}
+          <div className="cdb-content">
         <div className="cdb-hero">
           <div className="cdb-hero-left">
             <div className="cdb-hero-badge">{course.emoji} {course.name} · {level.name}</div>
@@ -310,7 +395,11 @@ const CourseDashboard = () => {
                 }}
               >
                 <span className="cdb-lesson-status">{done ? '✅' : ''}</span>
-                <div className="cdb-lesson-icon">{l.icon}</div>
+                {/* 3D Circular Node inside the Card */}
+                <div className={`cdb-card-3d-node ${done?'completed':''}`}>
+                  <span className="cdb-node-icon">{l.icon}</span>
+                </div>
+                
                 <div className="cdb-lesson-info">
                   <div className="cdb-lesson-name">{l.title}</div>
                   <div className="cdb-lesson-desc">{l.desc}</div>
@@ -320,6 +409,8 @@ const CourseDashboard = () => {
             );
           })}
         </div>
+          </div> {/* End Content */}
+        </div> {/* End Layout */}
       </main>
 
       <Switcher open={showModal} onClose={()=>setShowModal(false)} uCourses={uCourses} activeId={activeId} onSwitch={handleSwitch} onAdd={handleAdd} />
