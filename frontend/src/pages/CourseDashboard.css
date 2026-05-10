@@ -271,7 +271,7 @@
 }
 
 .cdb-lesson-card.completed {
-  border-color: #34d399; background: linear-gradient(180deg, var(--card) 80%, rgba(52,211,153,0.08));
+  border-color: #a855f7; background: linear-gradient(180deg, var(--card) 80%, rgba(168,85,247,0.08));
 }
 
 /* 3D Circular Node Inside Card */
@@ -291,9 +291,9 @@
   transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
 .cdb-card-3d-node.completed {
-  background: #58cc02;
-  border-color: #58cc02;
-  box-shadow: 0 6px 0 #46a302, 0 10px 20px rgba(88,204,2,0.3);
+  background: #a855f7;
+  border-color: #a855f7;
+  box-shadow: 0 6px 0 #7e22ce, 0 10px 20px rgba(168,85,247,0.3);
 }
 
 .cdb-lesson-card:hover .cdb-card-3d-node {
@@ -301,7 +301,7 @@
   box-shadow: 0 8px 0 var(--card-border), 0 15px 30px var(--shadow);
 }
 .cdb-lesson-card:hover .cdb-card-3d-node.completed {
-  box-shadow: 0 8px 0 #46a302, 0 15px 30px rgba(88,204,2,0.4);
+  box-shadow: 0 8px 0 #7e22ce, 0 15px 30px rgba(168,85,247,0.4);
 }
 
 .cdb-node-icon {
@@ -316,16 +316,25 @@
 .cdb-lesson-name { font-weight: 900; font-size: 1rem; color: var(--text); margin-bottom: 4px; line-height: 1.2; }
 .cdb-lesson-desc { font-size: 0.75rem; color: var(--text2); font-weight: 700; line-height: 1.3; }
 
-.cdb-lesson-xp {
-  display: inline-flex; align-items: center; gap: 2px;
-  margin-top: 1rem; font-size: 0.75rem; font-weight: 900;
-  padding: 5px 14px; border-radius: 50px;
-  background: #fbbf24; /* Flat color instead of gradient */
-  color: #78350f;
+/* Progress Bar inside lesson card */
+.cdb-card-progress-wrap {
+  width: 100%; margin-top: 1.2rem;
+  display: flex; flex-direction: column; gap: 0.4rem;
   position: relative; z-index: 2;
-  transition: transform 0.2s;
-  box-shadow: none !important; /* Force no glow */
-  filter: none !important; /* Force no drop-shadow */
+}
+.cdb-card-progress-bar {
+  width: 100%; height: 8px; border-radius: 8px;
+  background: rgba(0,0,0,0.08); overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+[data-theme="dark"] .cdb-card-progress-bar { background: rgba(255,255,255,0.08); }
+.cdb-card-progress-fill {
+  height: 100%; background: linear-gradient(90deg, #8b5cf6, #d946ef); border-radius: 8px;
+  transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+.cdb-card-progress-text {
+  font-size: 0.75rem; font-weight: 800; color: var(--text2);
+  text-align: right;
 }
 
 .cdb-lesson-status {
@@ -536,21 +545,24 @@
    RESPONSIVE
    ═══════════════════════════════════════ */
 @media (max-width: 850px) {
-  .cdb-layout { flex-direction: column; }
-  .cdb-sidebar { flex: auto; width: 100%; position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .cdb-layout { flex-direction: column; align-items: stretch; }
+  .cdb-sidebar { display: none; /* Hide entire sidebar on mobile/tablet */ }
   .cdb-roadmap { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 650px) {
-  .cdb-sidebar { grid-template-columns: 1fr; }
   .cdb-header { padding: 0 1rem; height: 58px; }
   .cdb-brand { display: none; /* Hide brand name on small screens to save space */ }
   .cdb-course-chip { font-size: 0.75rem; padding: 5px 12px; }
   
-  .cdb-main { padding: 1rem; }
-  .cdb-hero { flex-direction: column; padding: 1.8rem 1.2rem; text-align: center; border-radius: 22px; gap: 1.2rem; }
-  .cdb-hero::before { top: -20%; right: -20%; width: 180px; height: 180px; }
-  .cdb-hero::after { bottom: -20%; left: -10%; width: 150px; height: 150px; }
+  .cdb-main { padding: 1rem; overflow-x: hidden; }
+  .cdb-hero { 
+    flex-direction: column; padding: 1.8rem 1.2rem; text-align: center; 
+    border-radius: 22px; gap: 1.2rem;
+    margin: 0 0 1.5rem 0; width: 100%;
+  }
+  .cdb-hero::before { top: -10%; right: -20%; width: 180px; height: 180px; }
+  .cdb-hero::after { bottom: -10%; left: -10%; width: 150px; height: 150px; }
   
   .cdb-hero-title { font-size: 1.5rem; }
   .cdb-hero-stats { justify-content: center; }
@@ -559,10 +571,11 @@
   .cdb-ring-num { font-size: 1.3rem; }
   
   .cdb-roadmap { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
-  .cdb-lesson-card { padding: 1.2rem 0.8rem 1rem; border-radius: 20px; }
-  .cdb-lesson-icon { width: 48px; height: 48px; font-size: 1.5rem; margin-bottom: 0.6rem; }
-  .cdb-lesson-name { font-size: 0.85rem; }
-  .cdb-lesson-desc { font-size: 0.68rem; }
+  .cdb-lesson-card { padding: 1rem 0.6rem 0.8rem; border-radius: 18px; }
+  .cdb-card-3d-node { width: 55px; height: 55px; }
+  .cdb-node-icon { font-size: 1.6rem; }
+  .cdb-lesson-name { font-size: 0.85rem; margin-bottom: 2px; }
+  .cdb-lesson-desc { font-size: 0.65rem; }
   
   .cdb-lesson-view { padding: 1.5rem 1rem; border-radius: 22px; }
   .cdb-lesson-view-title { font-size: 1.2rem; }

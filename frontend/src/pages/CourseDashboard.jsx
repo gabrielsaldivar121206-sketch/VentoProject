@@ -394,7 +394,7 @@ const CourseDashboard = () => {
                   else setOpenLesson(l);
                 }}
               >
-                <span className="cdb-lesson-status">{done ? '✅' : ''}</span>
+                <span className="cdb-lesson-status">{done ? '✨' : ''}</span>
                 {/* 3D Circular Node inside the Card */}
                 <div className={`cdb-card-3d-node ${done?'completed':''}`}>
                   <span className="cdb-node-icon">{l.icon}</span>
@@ -404,7 +404,13 @@ const CourseDashboard = () => {
                   <div className="cdb-lesson-name">{l.title}</div>
                   <div className="cdb-lesson-desc">{l.desc}</div>
                 </div>
-                <span className="cdb-lesson-xp">⭐ +{l.xp} XP</span>
+                
+                <div className="cdb-card-progress-wrap">
+                  <div className="cdb-card-progress-bar">
+                    <div className="cdb-card-progress-fill" style={{ width: done ? '100%' : '0%' }}></div>
+                  </div>
+                  <span className="cdb-card-progress-text">{done ? '100%' : '0%'}</span>
+                </div>
               </motion.div>
             );
           })}
