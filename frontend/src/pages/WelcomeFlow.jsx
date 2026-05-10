@@ -130,7 +130,7 @@ const WelcomeFlow = () => {
                 width: '300vmax',
                 height: '300vmax',
                 borderRadius: '50%',
-                borderColor: isDark ? '#1a1a2e' : '#fef9ef',
+                borderColor: isDark ? '#0f0f14' : '#faf9ff',
                 borderStyle: 'solid',
                 boxSizing: 'border-box',
                 zIndex: 99999,
