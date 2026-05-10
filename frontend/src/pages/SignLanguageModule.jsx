@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDetector } from '../hooks/useDetector.js';
 import { LETRA_ES } from '../detectorLogica.js';
 import './SignLanguageModule.css';
-import './AppDashboard.css';
+import './ModuleShared.css';
 
 // ── Constantes ───────────────────────────────────────────────
 const MAX_HISTORY   = 30;

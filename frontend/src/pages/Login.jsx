@@ -69,7 +69,7 @@ const Login = () => {
             
             // Esperar que se desvanezca por completo (600ms) para que quede la pantalla 100% negra otra vez
             setTimeout(() => {
-              const irisColor = theme === 'dark' ? '#0f0f14' : '#faf9ff';
+              const irisColor = theme === 'dark' ? '#1a1a2e' : '#fef9ef';
               document.body.style.backgroundColor = irisColor;
               
               // AHORA actualizar el estado global, lo que desmontará la página
@@ -701,7 +701,7 @@ const Login = () => {
             width: '300vmax',
             height: '300vmax',
             borderRadius: '50%',
-            borderColor: theme === 'dark' ? '#0f0f14' : '#faf9ff',
+            borderColor: theme === 'dark' ? '#1a1a2e' : '#fef9ef',
             borderStyle: 'solid',
             boxSizing: 'border-box',
             zIndex: 999999,
@@ -722,7 +722,7 @@ const Login = () => {
               position: 'fixed', inset: 0, zIndex: 1000000,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               color: 'white',
-              background: theme === 'dark' ? '#0f0f14' : '#faf9ff'
+              background: theme === 'dark' ? '#1a1a2e' : '#fef9ef'
             }}
           >
             {/* Rocket emoji */}

@@ -9,7 +9,7 @@ import ExercisePicker from '../components/ExercisePicker/ExercisePicker';
 import '../components/LessonTheory/LessonTheory.css';
 import '../components/MiniGames/MiniGames.css';
 import './EnglishModule.css';
-import './AppDashboard.css';
+import './ModuleShared.css';
 
 const API_BASE = 'http://localhost:5000';
 const UNIT_COLORS = ['#58cc02', '#1cb0f6', '#ce82ff', '#ff9600', '#ff4b4b'];

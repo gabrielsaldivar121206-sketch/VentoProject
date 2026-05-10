@@ -1,0 +1,325 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+/* ═══════════════════════════════════════
+   VENTO EDU — Fun Learning Dashboard
+   ═══════════════════════════════════════ */
+:root {
+  --bg: #fef9ef; --bg2: #fff7e0; --text: #2d2d3a; --text2: #7a7a8a;
+  --card: #ffffff; --card-border: rgba(0,0,0,0.06);
+  --nav: rgba(255,255,255,0.9); --shadow: rgba(0,0,0,0.06);
+}
+[data-theme="dark"] {
+  --bg: #1a1a2e; --bg2: #16213e; --text: #f0f0f0; --text2: #8888aa;
+  --card: #1e1e32; --card-border: rgba(255,255,255,0.06);
+  --nav: rgba(26,26,46,0.92); --shadow: rgba(0,0,0,0.3);
+}
+
+.cdb-root {
+  min-height: 100vh; background: var(--bg);
+  font-family: 'Nunito', 'Segoe UI', sans-serif; color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ── Fun Background ── */
+.cdb-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.cdb-orb { position: absolute; border-radius: 50%; }
+.cdb-orb1 { width: 500px; height: 500px; top: -10%; right: -10%; filter: blur(100px); opacity: 0.15; animation: bob1 20s ease-in-out infinite alternate; }
+.cdb-orb2 { width: 400px; height: 400px; bottom: -5%; left: -10%; background: #fbbf24; filter: blur(100px); opacity: 0.12; animation: bob2 25s ease-in-out infinite alternate; }
+.cdb-orb3 { width: 300px; height: 300px; top: 50%; left: 50%; background: #ec4899; filter: blur(90px); opacity: 0.08; animation: bob1 18s ease-in-out infinite alternate-reverse; }
+.cdb-grid-pattern { display: none; }
+@keyframes bob1 { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(-30px,20px) scale(1.1)} }
+@keyframes bob2 { 0%{transform:translate(0,0)} 100%{transform:translate(20px,-30px) scale(0.9)} }
+
+/* ── Top Nav ── */
+.cdb-header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--nav); backdrop-filter: blur(16px);
+  border-bottom: 2px solid var(--card-border);
+  padding: 0 1.5rem; height: 62px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.cdb-header-left { display: flex; align-items: center; gap: 0.8rem; }
+.cdb-brand { font-weight: 900; font-size: 1.3rem; color: #7c3aed; }
+[data-theme="dark"] .cdb-brand { color: #a78bfa; }
+.cdb-course-chip {
+  display: flex; align-items: center; gap: 0.35rem;
+  padding: 6px 14px; border-radius: 50px; cursor: pointer;
+  font-weight: 800; font-size: 0.8rem; border: 2px solid var(--card-border);
+  background: var(--card); color: var(--text); transition: all 0.2s;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.cdb-course-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 16px var(--shadow); }
+.cdb-chip-lvl {
+  font-size: 0.6rem; padding: 2px 8px; border-radius: 50px;
+  background: #fbbf24; color: #78350f; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.cdb-header-right { display: flex; align-items: center; gap: 0.6rem; }
+.cdb-icon-btn {
+  width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--card-border);
+  background: var(--card); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s; font-size: 1.1rem;
+  box-shadow: 0 2px 6px var(--shadow);
+}
+.cdb-icon-btn:hover { transform: translateY(-2px) scale(1.08); }
+.cdb-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg,#7c3aed,#ec4899);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 900; font-size: 0.85rem; cursor: pointer;
+  border: 3px solid var(--bg); box-shadow: 0 2px 8px rgba(124,58,237,0.3);
+}
+
+/* ── Main ── */
+.cdb-main { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+
+/* ═══════════════════════════════════════
+   HERO — Fun Stats Banner
+   ═══════════════════════════════════════ */
+.cdb-hero {
+  background: linear-gradient(135deg, var(--cc,#7c3aed), color-mix(in srgb, var(--cc,#7c3aed) 60%, #ec4899));
+  border-radius: 28px; padding: 2rem 2.5rem; margin-bottom: 1.8rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  position: relative; overflow: hidden; color: white;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.cdb-hero::before {
+  content: ''; position: absolute; top: -30%; right: -10%; width: 250px; height: 250px;
+  background: rgba(255,255,255,0.1); border-radius: 50%;
+}
+.cdb-hero::after {
+  content: ''; position: absolute; bottom: -40%; left: -5%; width: 200px; height: 200px;
+  background: rgba(0,0,0,0.08); border-radius: 50%;
+}
+.cdb-hero-left { flex: 1; position: relative; z-index: 1; }
+.cdb-hero-badge { display: none; }
+.cdb-hero-title { font-size: 1.8rem; font-weight: 900; margin: 0 0 0.3rem; color: white; line-height: 1.2; }
+.cdb-hero-title span { color: #fde68a; }
+.cdb-hero-desc { font-size: 0.88rem; opacity: 0.85; font-weight: 700; margin: 0; line-height: 1.5; }
+.cdb-hero-stats { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+.cdb-chip {
+  display: flex; align-items: center; gap: 0.25rem;
+  padding: 6px 14px; border-radius: 50px;
+  font-size: 0.78rem; font-weight: 900; border: 2px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.15); color: white; backdrop-filter: blur(8px);
+}
+.cdb-chip-xp, .cdb-chip-streak, .cdb-chip-level {
+  background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.25); color: white;
+}
+
+.cdb-hero-right { position: relative; z-index: 1; flex-shrink: 0; }
+.cdb-ring-wrap { position: relative; width: 110px; height: 110px; }
+.cdb-ring-wrap svg { width: 100%; height: 100%; }
+.cdb-ring-bg { fill: none; stroke: rgba(255,255,255,0.15); stroke-width: 10; }
+.cdb-ring-fill {
+  fill: none; stroke: #fde68a; stroke-width: 10; stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: center;
+  transition: stroke-dashoffset 1s cubic-bezier(0.16,1,0.3,1);
+  filter: drop-shadow(0 0 8px rgba(253,230,138,0.5));
+}
+.cdb-ring-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.cdb-ring-num { font-size: 1.6rem; font-weight: 900; color: white; }
+.cdb-ring-lbl { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.7); }
+
+/* ═══════════════════════════════════════
+   SECTION TITLE
+   ═══════════════════════════════════════ */
+.cdb-section-title {
+  font-size: 1.3rem; font-weight: 900; color: var(--text);
+  margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem;
+}
+
+/* ═══════════════════════════════════════
+   LESSON CARDS — Grid of fun cards
+   ═══════════════════════════════════════ */
+.cdb-roadmap {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+}
+
+.cdb-lesson-card {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 1.8rem 1.2rem 1.4rem; border-radius: 24px;
+  background: var(--card); border: 2.5px solid var(--card-border);
+  cursor: pointer; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative; overflow: hidden;
+  box-shadow: 0 4px 16px var(--shadow);
+}
+.cdb-lesson-card::before { display: none; }
+.cdb-lesson-card::after {
+  content: ''; position: absolute; inset: 0; border-radius: 22px;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.03) 100%);
+  pointer-events: none;
+}
+.cdb-lesson-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 12px 40px var(--shadow);
+  border-color: var(--cc, #7c3aed);
+}
+.cdb-lesson-card:active { transform: translateY(-2px) scale(0.98); }
+
+.cdb-lesson-card.completed {
+  border-color: #34d399; background: linear-gradient(180deg, var(--card) 80%, rgba(52,211,153,0.08));
+}
+
+.cdb-lesson-icon {
+  width: 64px; height: 64px; border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; margin-bottom: 0.8rem; border: none;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--cc,#7c3aed) 15%, transparent), color-mix(in srgb, var(--cc,#7c3aed) 8%, transparent));
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.cdb-lesson-card:hover .cdb-lesson-icon { transform: scale(1.15) rotate(-5deg); }
+
+.cdb-lesson-info { width: 100%; }
+.cdb-lesson-name {
+  font-weight: 900; font-size: 0.95rem; color: var(--text);
+  margin-bottom: 4px; line-height: 1.2;
+}
+.cdb-lesson-desc { font-size: 0.72rem; color: var(--text2); font-weight: 700; line-height: 1.3; }
+
+.cdb-lesson-xp {
+  display: inline-flex; align-items: center; gap: 2px;
+  margin-top: 0.7rem; font-size: 0.7rem; font-weight: 900;
+  padding: 4px 12px; border-radius: 50px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #78350f; box-shadow: 0 2px 8px rgba(251,191,36,0.3);
+}
+
+.cdb-lesson-status {
+  position: absolute; top: 10px; right: 12px; font-size: 1.1rem;
+}
+
+.cdb-lesson-card:hover .cdb-lesson-xp { transform: scale(1.1); }
+
+/* ═══════════════════════════════════════
+   LESSON DETAIL VIEW
+   ═══════════════════════════════════════ */
+.cdb-lesson-view {
+  background: var(--card); border-radius: 28px;
+  border: 2.5px solid var(--card-border);
+  padding: 2.5rem; margin-bottom: 2rem;
+  box-shadow: 0 4px 24px var(--shadow);
+}
+.cdb-lesson-view-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+.cdb-lesson-view-title { font-size: 1.5rem; font-weight: 900; color: var(--text); }
+.cdb-lesson-back {
+  padding: 8px 18px; border-radius: 50px; border: 2.5px solid var(--card-border);
+  background: var(--card); color: var(--text); font-weight: 800;
+  font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+  font-family: 'Nunito', sans-serif; box-shadow: 0 2px 8px var(--shadow);
+}
+.cdb-lesson-back:hover { transform: translateY(-2px); }
+
+.cdb-lesson-content { font-size: 1rem; line-height: 1.9; color: var(--text2); }
+.cdb-lesson-content h3 { font-size: 1.15rem; font-weight: 900; color: var(--text); margin: 1.5rem 0 0.8rem; }
+.cdb-lesson-content p { margin: 0 0 1rem; }
+.cdb-lesson-content ul { margin: 0 0 1rem; padding-left: 1.4rem; }
+.cdb-lesson-content li { margin-bottom: 0.5rem; font-weight: 600; }
+.cdb-lesson-content .tip-box {
+  background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.04));
+  border: 2px solid rgba(251,191,36,0.2); border-left: 4px solid #fbbf24;
+  border-radius: 16px; padding: 1rem 1.2rem; margin: 1rem 0;
+  font-size: 0.9rem; font-weight: 700;
+}
+
+/* ── Detector ── */
+.cdb-cam-box {
+  position: relative; width: 100%; max-width: 480px; aspect-ratio: 4/3;
+  border-radius: 24px; overflow: hidden; background: #111;
+  border: 3px solid var(--cc,#10b981); margin: 0 auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.cdb-cam-box video { width: 100%; height: 100%; object-fit: cover; }
+.cdb-cam-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.cdb-cam-live {
+  position: absolute; top: 12px; right: 12px;
+  background: #ef4444; color: white; padding: 3px 10px;
+  border-radius: 50px; font-size: 0.6rem; font-weight: 900;
+  display: flex; align-items: center; gap: 4px;
+  letter-spacing: 1px;
+}
+.cdb-cam-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: white; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.cdb-detect-result { text-align: center; margin-top: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.cdb-detect-letter { font-size: 4rem; font-weight: 900; color: var(--cc,#10b981); }
+.cdb-detect-conf { font-size: 0.85rem; font-weight: 700; color: var(--text2); }
+
+/* ═══════════════════════════════════════
+   CONFIRM BUTTON
+   ═══════════════════════════════════════ */
+.cdb-confirm-btn {
+  width: 100%; padding: 14px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg, #58cc02, #46a302);
+  color: white; font-weight: 900; font-size: 0.95rem; cursor: pointer;
+  transition: all 0.2s; font-family: 'Nunito', sans-serif; margin-top: 0.8rem;
+  box-shadow: 0 4px 0 #3c8c01, 0 6px 20px rgba(88,204,2,0.3);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.cdb-confirm-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #3c8c01, 0 10px 30px rgba(88,204,2,0.35); }
+.cdb-confirm-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #3c8c01; }
+.cdb-confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ═══════════════════════════════════════
+   MODAL
+   ═══════════════════════════════════════ */
+.cdb-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.cdb-modal { background: var(--card); border-radius: 28px; width: 100%; max-width: 460px; max-height: 85vh; overflow-y: auto; box-shadow: 0 25px 80px rgba(0,0,0,0.2); border: 2.5px solid var(--card-border); }
+.cdb-modal-head { padding: 1.5rem 1.5rem 0.8rem; display: flex; align-items: center; justify-content: space-between; }
+.cdb-modal-title { font-size: 1.2rem; font-weight: 900; color: var(--text); margin: 0; }
+.cdb-modal-x { width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--card-border); cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; color: var(--text2); transition: all 0.2s; }
+.cdb-modal-x:hover { background: rgba(0,0,0,0.1); }
+.cdb-modal-body { padding: 0 1.5rem 1.5rem; }
+.cdb-modal-label { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text2); margin-bottom: 0.6rem; margin-top: 0.4rem; }
+.cdb-m-item {
+  display: flex; align-items: center; gap: 0.7rem; padding: 0.8rem;
+  border-radius: 16px; cursor: pointer; transition: all 0.2s;
+  border: 2.5px solid transparent; margin-bottom: 0.3rem;
+}
+.cdb-m-item:hover { background: rgba(124,58,237,0.04); }
+.cdb-m-item.active { background: rgba(124,58,237,0.06); border-color: #7c3aed; }
+.cdb-m-icon { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+.cdb-m-name { font-weight: 900; font-size: 0.88rem; color: var(--text); }
+.cdb-m-lvl { font-size: 0.7rem; font-weight: 700; color: var(--text2); }
+.cdb-m-check { font-size: 1rem; color: #58cc02; margin-left: auto; }
+.cdb-add-btn {
+  width: 100%; padding: 0.7rem; border-radius: 14px;
+  border: 2.5px dashed rgba(124,58,237,0.2); background: transparent;
+  color: #7c3aed; font-weight: 900; font-size: 0.82rem;
+  cursor: pointer; font-family: 'Nunito', sans-serif; margin-top: 0.4rem; transition: all 0.2s;
+}
+.cdb-add-btn:hover { background: rgba(124,58,237,0.04); }
+.cdb-new-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 0.5rem; margin-top: 0.5rem; }
+.cdb-new-card { padding: 0.8rem; border-radius: 16px; border: 2.5px solid var(--card-border); cursor: pointer; text-align: center; transition: all 0.2s; }
+.cdb-new-card:hover { transform: translateY(-2px); border-color: #7c3aed; }
+.cdb-new-card.sel { border-color: #7c3aed; background: rgba(124,58,237,0.06); }
+.cdb-new-emoji { font-size: 1.6rem; display: block; margin-bottom: 0.2rem; }
+.cdb-new-name { font-weight: 900; font-size: 0.78rem; color: var(--text); }
+.cdb-lvl-opts { display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.5rem; }
+.cdb-lvl-opt { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.8rem; border-radius: 14px; border: 2.5px solid var(--card-border); cursor: pointer; transition: all 0.2s; }
+.cdb-lvl-opt:hover { border-color: #7c3aed; }
+.cdb-lvl-opt.sel { border-color: #7c3aed; background: rgba(124,58,237,0.06); }
+.cdb-lvl-emoji { font-size: 1.1rem; }
+.cdb-lvl-name { font-weight: 900; font-size: 0.82rem; color: var(--text); }
+.cdb-lvl-desc { font-size: 0.68rem; color: var(--text2); font-weight: 600; }
+.cdb-close-btn {
+  width: 100%; padding: 0.6rem; border-radius: 12px;
+  border: 2px solid var(--card-border); background: transparent;
+  color: var(--text2); font-weight: 800; font-size: 0.78rem;
+  cursor: pointer; font-family: 'Nunito', sans-serif; margin-top: 0.4rem; transition: all 0.2s;
+}
+.cdb-close-btn:hover { background: rgba(0,0,0,0.03); }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════ */
+@media (max-width: 600px) {
+  .cdb-header { padding: 0 1rem; height: 56px; }
+  .cdb-main { padding: 1rem; }
+  .cdb-hero { flex-direction: column; padding: 1.5rem; text-align: center; border-radius: 22px; }
+  .cdb-hero-title { font-size: 1.4rem; }
+  .cdb-hero-stats { justify-content: center; }
+  .cdb-ring-wrap { width: 90px; height: 90px; }
+  .cdb-ring-num { font-size: 1.3rem; }
+  .cdb-roadmap { grid-template-columns: 1fr; }
+  .cdb-lesson-card { padding: 1.4rem 1rem 1.2rem; }
+  .cdb-new-grid { grid-template-columns: 1fr; }
+}

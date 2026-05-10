@@ -7,13 +7,8 @@ import OfflineIndicator from './components/OfflineIndicator';
 import PageTransition from './components/PageTransition';
 import Login from './pages/Login';
 import WelcomeFlow from './pages/WelcomeFlow';
-import AppDashboard from './pages/AppDashboard';
-import EnglishModule from './pages/EnglishModule';
-import MusicModule from './pages/MusicModule';
-import MathModule from './pages/MathModule';
-import ChessModule from './pages/ChessModule';
+import CourseDashboard from './pages/CourseDashboard';
 import AdminPanel from './pages/AdminPanel';
-import SignLanguageModule from './pages/SignLanguageModule';
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -47,37 +42,12 @@ const AnimatedRoutes = () => {
         } />
         <Route path="/dashboard" element={
           <ProtectedRoute>
-            <PageTransition><AppDashboard /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/english" element={
-          <ProtectedRoute>
-            <PageTransition><EnglishModule /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/music" element={
-          <ProtectedRoute>
-            <PageTransition><MusicModule /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/math" element={
-          <ProtectedRoute>
-            <PageTransition><MathModule /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/chess" element={
-          <ProtectedRoute>
-            <PageTransition><ChessModule /></PageTransition>
+            <PageTransition><CourseDashboard /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/admin" element={
           <ProtectedRoute requireAdmin>
             <PageTransition><AdminPanel /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/signlanguage" element={
-          <ProtectedRoute>
-            <PageTransition><SignLanguageModule /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="*" element={<Navigate to="/" replace />} />

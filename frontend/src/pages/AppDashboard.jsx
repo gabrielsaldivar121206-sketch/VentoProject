@@ -1,239 +1,371 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { sounds } from '../hooks/useSounds';
-import QuickActionsFab from '../components/QuickActionsFab';
-import { useXpAnimation } from '../components/XpAnimation';
-import { Sun, Moon, LogOut, Settings, LayoutGrid, Play, Heart, Flame, Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
 import './AppDashboard.css';
 
-/* ── MOCK DATA ── */
-const COURSES = [
-  { id: 'english', name: 'Inglés Premium', desc: 'Domina el idioma con gramática interactiva.', route: '/english', color: 'var(--blue)', difficulty: 'Principiante', emoji: '🇬🇧', progress: 45 },
-  { id: 'music', name: 'Teoría Musical', desc: 'Aprende a leer partituras y tocar el piano.', route: '/music', color: 'var(--purple)', difficulty: 'Intermedio', emoji: '🎹', progress: 12 },
-  { id: 'signlanguage', name: 'Lenguaje de Señas', desc: 'Comunícate con tus manos de manera fluida.', route: '/signlanguage', color: 'var(--cyan)', difficulty: 'Básico', emoji: '🤟', progress: 80 },
-  { id: 'math', name: 'Matemáticas', desc: 'Lógica, álgebra y resolución de problemas.', route: '/math', color: 'var(--orange)', difficulty: 'Avanzado', emoji: '📐', progress: 5 },
-  { id: 'chess', name: 'Ajedrez', desc: 'Aperturas, tácticas y estrategia maestra.', route: '/chess', color: 'var(--green)', difficulty: 'Intermedio', emoji: '♟️', progress: 60 }
-];
+// ── Course Modules (lazy-ish imports) ──
+import EnglishModule from './EnglishModule';
+import MusicModule from './MusicModule';
+import MathModule from './MathModule';
+import ChessModule from './ChessModule';
+import SignLanguageModule from './SignLanguageModule';
 
-const CourseCardNeon = ({ course, navigate }) => {
-  const [hover, setHover] = useState(false);
-  const getRGB = (varName) => {
-    switch(varName) {
-      case 'var(--blue)': return '9, 132, 227';
-      case 'var(--purple)': return '108, 92, 231';
-      case 'var(--cyan)': return '0, 206, 201';
-      case 'var(--orange)': return '253, 203, 110';
-      case 'var(--green)': return '0, 184, 148';
-      default: return '108, 92, 231';
+// ── Course Registry ──
+const COURSES = {
+  english:      { id: 'english',      name: 'Inglés',       emoji: '🇺🇸', color: '#3b82f6',  desc: 'Domina el idioma más hablado del mundo con lecciones interactivas y ejercicios prácticos.' },
+  chess:        { id: 'chess',        name: 'Ajedrez',      emoji: '♟️',  color: '#f59e0b',  desc: 'Desarrolla tu pensamiento estratégico con partidas, puzzles y teoría de aperturas.' },
+  music:        { id: 'music',        name: 'Música',       emoji: '🎹',  color: '#ec4899',  desc: 'Aprende a leer partituras y tocar canciones con nuestro piano digital interactivo.' },
+  signlanguage: { id: 'signlanguage', name: 'Señas',        emoji: '🤟',  color: '#10b981',  desc: 'Comunícate con tus manos usando nuestra IA de detección en tiempo real.' },
+  math:         { id: 'math',         name: 'Matemáticas',  emoji: '📐',  color: '#8b5cf6',  desc: 'Fortalece tus bases matemáticas con ejercicios graduales y mini-juegos.' },
+};
+
+const LEVELS = {
+  beginner:     { id: 'beginner',     name: 'Principiante', emoji: '🌱' },
+  intermediate: { id: 'intermediate', name: 'Intermedio',   emoji: '🔥' },
+  advanced:     { id: 'advanced',     name: 'Avanzado',     emoji: '👑' },
+};
+
+const MODULE_MAP = {
+  english:      EnglishModule,
+  chess:        ChessModule,
+  music:        MusicModule,
+  signlanguage: SignLanguageModule,
+  math:         MathModule,
+};
+
+// ── Helpers ──
+const getUserCourses = (email) => {
+  try { return JSON.parse(localStorage.getItem(`vento_courses_${email}`) || '[]'); }
+  catch { return []; }
+};
+
+const getActiveCourse = (email) => {
+  return localStorage.getItem(`vento_active_course_${email}`) || null;
+};
+
+const setActiveCourse = (email, courseId) => {
+  localStorage.setItem(`vento_active_course_${email}`, courseId);
+};
+
+const addCourseToUser = (email, courseId, level) => {
+  const courses = getUserCourses(email);
+  const filtered = courses.filter(c => c.courseId !== courseId);
+  filtered.push({ courseId, level, addedAt: Date.now() });
+  localStorage.setItem(`vento_courses_${email}`, JSON.stringify(filtered));
+  localStorage.setItem(`vento_${courseId}_placement`, level);
+  setActiveCourse(email, courseId);
+};
+
+// ═══════════════════════════════════════════════════════════════
+// COURSE SWITCHER MODAL
+// ═══════════════════════════════════════════════════════════════
+const CourseSwitcher = ({ isOpen, onClose, userCourses, activeCourseId, onSwitch, onAddCourse }) => {
+  const [addingNew, setAddingNew] = useState(false);
+  const [newCourseId, setNewCourseId] = useState(null);
+  const [newLevel, setNewLevel] = useState(null);
+
+  const availableCourses = Object.values(COURSES).filter(
+    c => !userCourses.some(uc => uc.courseId === c.id)
+  );
+
+  const handleConfirmAdd = () => {
+    if (newCourseId && newLevel) {
+      onAddCourse(newCourseId, newLevel);
+      setAddingNew(false);
+      setNewCourseId(null);
+      setNewLevel(null);
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <motion.div 
-      className={`course-card-neon ${hover ? 'hov' : ''}`}
-      onMouseEnter={() => { setHover(true); sounds.hover(); }}
-      onMouseLeave={() => setHover(false)}
-      onClick={() => { sounds.navigate(); navigate(course.route); }}
-      style={{ '--cc': course.color, '--ccrgb': getRGB(course.color) }}
-      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-    >
-      <div className="ccn-glow-bg"></div>
-      
-      <div className="ccn-top">
-        <div className="ccn-icon-wrap">
-          <div className="ccn-icon-ring"></div>
-          <span className="ccn-emoji">{course.emoji}</span>
-        </div>
-        <span className="ccn-difficulty">{course.difficulty}</span>
-      </div>
-
-      <div className="ccn-content">
-        <h3 className="ccn-name">{course.name}</h3>
-        <p className="ccn-desc">{course.desc}</p>
-      </div>
-
-      <div className="ccn-footer">
-        <div className="ccn-progress-container">
-          <div className="ccn-progress-info">
-            <span>Progreso</span>
-            <span>{course.progress}%</span>
+    <AnimatePresence>
+      <motion.div
+        className="cd-modal-overlay"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      >
+        <motion.div
+          className="cd-modal"
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="cd-modal-header">
+            <h2 className="cd-modal-title">📚 Mis Cursos</h2>
+            <button className="cd-modal-close" onClick={onClose}>✕</button>
           </div>
-          <div className="ccn-progress-bar">
-            <div className="ccn-progress-fill" style={{ width: `${course.progress}%` }}></div>
-          </div>
-        </div>
-        <button className="ccn-play-btn"><Play size={16} fill="currentColor" /></button>
-      </div>
-    </motion.div>
+
+          {!addingNew ? (
+            <>
+              {/* Existing courses */}
+              <div className="cd-modal-section">
+                <p className="cd-modal-section-title">Cursos activos</p>
+                {userCourses.map(uc => {
+                  const course = COURSES[uc.courseId];
+                  const level = LEVELS[uc.level];
+                  if (!course) return null;
+                  return (
+                    <div
+                      key={uc.courseId}
+                      className={`cd-course-item ${uc.courseId === activeCourseId ? 'active' : ''}`}
+                      onClick={() => { onSwitch(uc.courseId); onClose(); }}
+                    >
+                      <div
+                        className="cd-course-item-icon"
+                        style={{ background: `${course.color}15`, border: `2px solid ${course.color}30` }}
+                      >
+                        {course.emoji}
+                      </div>
+                      <div className="cd-course-item-info">
+                        <div className="cd-course-item-name">{course.name}</div>
+                        <div className="cd-course-item-level">{level?.emoji} {level?.name}</div>
+                      </div>
+                      {uc.courseId === activeCourseId && (
+                        <span className="cd-course-item-check">✓</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Add new course */}
+              {availableCourses.length > 0 && (
+                <div className="cd-modal-section">
+                  <button className="cd-add-course-btn" onClick={() => setAddingNew(true)}>
+                    + Añadir nuevo curso
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Step 1: Choose course */}
+              <div className="cd-modal-section">
+                <p className="cd-modal-section-title">Elige un curso</p>
+                <div className="cd-new-courses-grid">
+                  {availableCourses.map(c => (
+                    <div
+                      key={c.id}
+                      className={`cd-new-course-card ${newCourseId === c.id ? 'selected' : ''}`}
+                      onClick={() => setNewCourseId(c.id)}
+                    >
+                      <span className="cd-new-course-emoji">{c.emoji}</span>
+                      <span className="cd-new-course-name">{c.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Step 2: Choose level */}
+              {newCourseId && (
+                <div className="cd-modal-section">
+                  <p className="cd-modal-section-title">Elige tu nivel</p>
+                  <div className="cd-level-options">
+                    {Object.values(LEVELS).map(l => (
+                      <div
+                        key={l.id}
+                        className={`cd-level-option ${newLevel === l.id ? 'selected' : ''}`}
+                        onClick={() => setNewLevel(l.id)}
+                      >
+                        <span className="cd-level-option-emoji">{l.emoji}</span>
+                        <div>
+                          <div className="cd-level-option-name">{l.name}</div>
+                          <div className="cd-level-option-desc">
+                            {l.id === 'beginner' ? 'Empezar desde cero' :
+                             l.id === 'intermediate' ? 'Ya conozco lo básico' : 'Tengo buen nivel'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="cd-modal-footer">
+                <button
+                  className="cd-confirm-btn"
+                  disabled={!newCourseId || !newLevel}
+                  onClick={handleConfirmAdd}
+                >
+                  Comenzar curso
+                </button>
+                <button
+                  className="cd-logout-btn"
+                  style={{ borderColor: 'rgba(139,92,246,0.15)', background: 'rgba(139,92,246,0.04)', color: '#7c3aed' }}
+                  onClick={() => { setAddingNew(false); setNewCourseId(null); setNewLevel(null); }}
+                >
+                  ← Volver
+                </button>
+              </div>
+            </>
+          )}
+
+          {!addingNew && (
+            <div className="cd-modal-footer">
+              <button className="cd-logout-btn" onClick={() => { onClose(); }}>
+                Cerrar
+              </button>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
+// ═══════════════════════════════════════════════════════════════
+// MAIN DASHBOARD
+// ═══════════════════════════════════════════════════════════════
 const AppDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  const { XpParticles } = useXpAnimation();
-  const [avatar] = useState(() => localStorage.getItem('vento_avatar') || null);
-  const [greeting, setGreeting] = useState('');
+  const email = user?.email || '';
 
-  useEffect(() => { 
-    setTimeout(() => setMounted(true), 100); 
+  // Theme
+  const [theme, setTheme] = useState(() => localStorage.getItem('vento-theme') || 'light');
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('vento-theme', theme);
+  }, [theme]);
 
-    // Calculate Time-based Greeting
-    const hour = new Date().getHours();
-    if (hour < 12) {
-      setGreeting('Buenos días');
-    } else if (hour < 19) {
-      setGreeting('Buenas tardes');
-    } else {
-      setGreeting('Buenas noches');
+  // Course state
+  const [userCourses, setUserCourses] = useState(() => getUserCourses(email));
+  const [activeCourseId, setActiveCourseId] = useState(() => getActiveCourse(email));
+  const [showSwitcher, setShowSwitcher] = useState(false);
+
+  // If no courses, redirect to onboarding
+  useEffect(() => {
+    if (userCourses.length === 0) {
+      navigate('/welcome');
     }
-  }, []);
+  }, [userCourses, navigate]);
 
-  const totalXp = 1250;
-  const bestStreak = 12;
-  const lives = 5;
-  const initial = user?.name?.charAt(0)?.toUpperCase() || 'E';
+  // Active course data
+  const activeCourse = COURSES[activeCourseId];
+  const activeUserCourse = userCourses.find(c => c.courseId === activeCourseId);
+  const activeLevel = LEVELS[activeUserCourse?.level] || LEVELS.beginner;
+
+  // Progress data from auth context
+  const progress = user?.progress?.[activeCourseId] || {};
+  const xp = progress.xp || 0;
+  const streak = progress.streak || 0;
+  const courseLevel = progress.level || 1;
+
+  // Get the module component
+  const ModuleComponent = MODULE_MAP[activeCourseId];
+
+  // Handlers
+  const handleSwitchCourse = (courseId) => {
+    setActiveCourse(email, courseId);
+    setActiveCourseId(courseId);
+  };
+
+  const handleAddCourse = (courseId, level) => {
+    addCourseToUser(email, courseId, level);
+    setUserCourses(getUserCourses(email));
+    setActiveCourseId(courseId);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  const firstName = user?.name?.split(' ')[0] || 'Estudiante';
+
+  if (!activeCourse) return null;
 
   return (
-    <div className={`pro-home-layout ${mounted ? 'mounted' : ''}`}>
-      <XpParticles />
-      <QuickActionsFab />
-
-      {/* Ambient Mesh Grid */}
-      <div className="pro-ambient-bg">
-        <div className="pro-orb pro-orb-1"></div>
-        <div className="pro-orb pro-orb-2"></div>
-        <div className="pro-grid-overlay"></div>
+    <div className="cd-root" style={{ '--course-color': activeCourse.color }}>
+      {/* Background */}
+      <div className="cd-bg">
+        <div className="cd-bg-orb cd-bg-orb1" />
+        <div className="cd-bg-orb cd-bg-orb2" />
+        <div className="cd-bg-orb cd-bg-orb3" />
       </div>
 
-      {/* TOP NAVBAR */}
-      <nav className="pro-home-topbar">
-        <div className="pht-inner">
-          <div className="pht-brand" onClick={() => sounds.click()}>
-            <div className="pht-brand-icon">
-              <LayoutGrid size={20} strokeWidth={2.5} />
-            </div>
-            <span className="pht-brand-text">Vento<span>Edu</span></span>
-          </div>
-
-          <div className="pht-actions">
-            <div className="pht-stats">
-              <div className="pht-stat-circle stat-lives" title="Vidas">
-                <Heart size={16} fill="currentColor" /> <span>{lives}</span>
-              </div>
-              <div className="pht-stat-circle stat-streak" title="Racha">
-                <Flame size={16} fill="currentColor" /> <span>{bestStreak}</span>
-              </div>
-              <div className="pht-stat-circle stat-xp" title="Experiencia">
-                <Zap size={16} fill="currentColor" /> <span>{totalXp}</span>
-              </div>
-            </div>
-            
-            <button className="pht-btn" onClick={() => { sounds.click(); toggleTheme(); }} title="Cambiar Tema">
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <button className="pht-btn" onClick={() => { sounds.click(); }} title="Ajustes">
-              <Settings size={18} />
-            </button>
-            
-            <div className="pht-user" onClick={() => { sounds.navigate(); logout(); navigate('/'); }} title="Cerrar Sesión">
-               {avatar ? <img src={avatar} alt="Avatar" className="pht-avatar" /> : <div className="pht-avatar">{initial}</div>}
-               <span className="pht-logout-icon"><LogOut size={16} /></span>
-            </div>
+      {/* Top Navigation Bar */}
+      <nav className="cd-topbar">
+        <div className="cd-topbar-left">
+          <span className="cd-logo">VentoEdu</span>
+          <button className="cd-course-pill" onClick={() => setShowSwitcher(true)}>
+            <span className="cd-course-pill-emoji">{activeCourse.emoji}</span>
+            <span>{activeCourse.name}</span>
+            <span className="cd-course-pill-level">{activeLevel.emoji} {activeLevel.name}</span>
+          </button>
+        </div>
+        <div className="cd-topbar-right">
+          <button className="cd-topbar-btn" onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
+          <button className="cd-topbar-btn" onClick={() => setShowSwitcher(true)}>
+            📚
+          </button>
+          <div className="cd-user-avatar" onClick={handleLogout} title="Cerrar sesión">
+            {firstName.charAt(0).toUpperCase()}
           </div>
         </div>
       </nav>
 
-      {/* MAIN CONTENT */}
-      <main className="pro-home-content">
-        
-        {/* DASHBOARD HERO HUD */}
-        <motion.div className="pro-dashboard-hero"
-          initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          
-          {/* Top Row: Greeting & Level Ring */}
-          <div className="pdh-top-row">
-            <div className="pdh-greeting-col">
-              <div className="pdh-time-badge">
-                {new Date().getHours() < 12 ? '☀️' : new Date().getHours() < 19 ? '🌤️' : '🌙'} {greeting}
-              </div>
-              <h1 className="pdh-title">¡Hola, <span>{user?.name?.split(' ')[0] || 'estudiante'}</span>!</h1>
-              <p className="pdh-subtitle">Tienes <strong>{COURSES.length} cursos</strong> disponibles hoy 🎓</p>
-              <div className="pdh-motivational-badge">
-                <span className="emoji">🦸‍♂️</span> ¡El conocimiento es tu superpoder!
-              </div>
+      {/* Main content */}
+      <main className="cd-main">
+        {/* Hero header */}
+        <div className="cd-hero">
+          <div className="cd-hero-left">
+            <div className="cd-hero-greeting">
+              {activeCourse.emoji} {activeCourse.name} · {activeLevel.name}
             </div>
-
-            <div className="pdh-level-col">
-              <div className="pdh-level-ring-container">
-                <svg className="pdh-ring-svg" width="120" height="120" viewBox="0 0 120 120">
-                  <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
-                  <circle cx="60" cy="60" r="54" fill="none" stroke="var(--blue)" strokeWidth="8" strokeDasharray="339.29" strokeDashoffset="220" strokeLinecap="round" transform="rotate(-90 60 60)" />
-                </svg>
-                <div className="pdh-level-inner">
-                  <span className="pdh-crown">👑</span>
-                  <span className="pdh-lvl-num">2</span>
-                  <span className="pdh-lvl-label">NIVEL</span>
-                </div>
-              </div>
-              <div className="pdh-xp-badge">70/200 XP</div>
+            <h1 className="cd-hero-title">
+              ¡Hola, <span>{firstName}</span>!
+            </h1>
+            <p className="cd-hero-desc">{activeCourse.desc}</p>
+            <div className="cd-hero-stats">
+              <span className="cd-stat-chip cd-stat-xp">⚡ {xp} XP</span>
+              <span className="cd-stat-chip cd-stat-streak">🔥 Racha {streak}</span>
+              <span className="cd-stat-chip cd-stat-level">{activeLevel.emoji} Nivel {courseLevel}</span>
             </div>
           </div>
-
-          {/* 4 Stats Cards Grid */}
-          <div className="pdh-stats-grid">
-            <div className="pdh-stat-card">
-              <div className="pdh-sc-icon" style={{ color: '#ff9f43' }}>⚡</div>
-              <div className="pdh-sc-val">{totalXp}</div>
-              <div className="pdh-sc-lbl">XP TOTAL</div>
-            </div>
-            <div className="pdh-stat-card">
-              <div className="pdh-sc-icon" style={{ color: '#ff4757' }}>🔥</div>
-              <div className="pdh-sc-val">{bestStreak}</div>
-              <div className="pdh-sc-lbl">MEJOR RACHA</div>
-            </div>
-            <div className="pdh-stat-card">
-              <div className="pdh-sc-icon" style={{ color: '#2ed573' }}>📚</div>
-              <div className="pdh-sc-val">2</div>
-              <div className="pdh-sc-lbl">LECCIONES</div>
-            </div>
-            <div className="pdh-stat-card">
-              <div className="pdh-sc-icon" style={{ color: '#a29bfe' }}>🎓</div>
-              <div className="pdh-sc-val">{COURSES.length}</div>
-              <div className="pdh-sc-lbl">CURSOS</div>
+          <div className="cd-hero-right">
+            <div className="cd-progress-ring-wrap">
+              <svg viewBox="0 0 140 140">
+                <circle className="cd-ring-bg" cx="70" cy="70" r="60" />
+                <circle
+                  className="cd-ring-fill"
+                  cx="70" cy="70" r="60"
+                  strokeDasharray={2 * Math.PI * 60}
+                  strokeDashoffset={2 * Math.PI * 60 - (2 * Math.PI * 60 * Math.min(xp % 100, 100)) / 100}
+                />
+              </svg>
+              <div className="cd-ring-inner">
+                <span className="cd-ring-pct">{courseLevel}</span>
+                <span className="cd-ring-label">NIVEL</span>
+              </div>
             </div>
           </div>
-
-          {/* Daily Quest Bar */}
-          <div className="pdh-daily-quest">
-            <div className="pdh-dq-icon">🎯</div>
-            <div className="pdh-dq-info">
-              <h4>Reto Diario</h4>
-              <p>Completa 3 lecciones hoy para ganar +100 XP bonus</p>
-            </div>
-            <div className="pdh-dq-progress">
-              <span>2</span>/3
-            </div>
-            <div className="pdh-dq-bg-bar">
-              <div className="pdh-dq-fill-bar" style={{ width: '66%' }}></div>
-            </div>
-          </div>
-
-        </motion.div>
-
-        {/* COURSES GRID */}
-        <div className="courses-grid-neon" style={{ paddingBottom: '4rem' }}>
-          {COURSES.map(course => (
-             <CourseCardNeon key={course.id} course={course} navigate={navigate} />
-          ))}
         </div>
 
+        {/* Course Module */}
+        <div className="cd-module-wrap">
+          {ModuleComponent && <ModuleComponent level={activeUserCourse?.level} />}
+        </div>
       </main>
+
+      {/* Course Switcher Modal */}
+      <CourseSwitcher
+        isOpen={showSwitcher}
+        onClose={() => setShowSwitcher(false)}
+        userCourses={userCourses}
+        activeCourseId={activeCourseId}
+        onSwitch={handleSwitchCourse}
+        onAddCourse={handleAddCourse}
+      />
     </div>
   );
 };

@@ -13,7 +13,7 @@ import '../components/LessonTheory/LessonTheory.css';
 import '../components/MiniGames/MiniGames.css';
 import './EnglishModule.css';
 import './CourseCardV3.css';
-import './AppDashboard.css';
+import './ModuleShared.css';
 
 /* ─── Generic Course Module ─────────────────────────────────────────────────
    Receives:
@@ -492,7 +492,7 @@ const GenericCourseModule = ({ courseId, courseName, courseColor, courseEmoji, l
                     </div>
                   </div>
                   <div className="pdh-xp-badge" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '0.3rem 0.8rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.5px', border: '1px solid rgba(255,255,255,0.2)' }}>
-                    Nivel {level}
+                    Nivel {levelBadge}
                   </div>
                 </div>
               </div>

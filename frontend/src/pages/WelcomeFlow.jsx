@@ -69,6 +69,16 @@ const WelcomeFlow = () => {
     try {
       if (user?.email) {
         localStorage.setItem(`vento_onboarded_${user.email}`, 'true');
+        
+        // Save course + level
+        const courseEntry = { courseId: selectedCourse.id, level: level.id, addedAt: Date.now() };
+        const existing = JSON.parse(localStorage.getItem(`vento_courses_${user.email}`) || '[]');
+        const filtered = existing.filter(c => c.courseId !== selectedCourse.id);
+        filtered.push(courseEntry);
+        localStorage.setItem(`vento_courses_${user.email}`, JSON.stringify(filtered));
+        localStorage.setItem(`vento_active_course_${user.email}`, selectedCourse.id);
+        // Also set the module-specific placement key so modules skip their own placement screens
+        localStorage.setItem(`vento_${selectedCourse.id}_placement`, level.id);
       }
     } catch (e) {}
     setTimeout(() => navigate('/dashboard'), 500);
@@ -120,7 +130,7 @@ const WelcomeFlow = () => {
                 width: '300vmax',
                 height: '300vmax',
                 borderRadius: '50%',
-                borderColor: isDark ? '#0f0f14' : '#faf9ff',
+                borderColor: isDark ? '#1a1a2e' : '#fef9ef',
                 borderStyle: 'solid',
                 boxSizing: 'border-box',
                 zIndex: 99999,
