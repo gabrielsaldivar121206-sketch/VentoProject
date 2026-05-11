@@ -191,6 +191,8 @@ const CourseDashboard = () => {
   const [openLesson, setOpenLesson] = useState(null);
   const [completedLessons, setCompletedLessons] = useState(()=>getCompleted(email,activeId));
   const [detectorLesson, setDetectorLesson] = useState(null);
+  const [activeTrivia, setActiveTrivia] = useState(null);
+  const [triviaState, setTriviaState] = useState('idle'); // 'idle' | 'success' | 'error'
 
   useEffect(() => { if(uCourses.length===0) navigate('/welcome'); }, [uCourses,navigate]);
   useEffect(() => { setCompletedLessons(getCompleted(email,activeId)); setOpenLesson(null); setDetectorLesson(null); }, [activeId,email]);
@@ -265,7 +267,12 @@ const CourseDashboard = () => {
                         className={`cdb-lesson-node ${isDone ? 'completed' : ''}`}
                         whileHover={{scale:1.15, rotate: isDone ? 0 : 5}} 
                         whileTap={{scale:0.85}}
-                        onClick={() => handleComplete(step.id)}
+                        onClick={() => {
+                          if (!isDone) {
+                            setActiveTrivia(step);
+                            setTriviaState('idle');
+                          }
+                        }}
                      >
                         <span className="cdb-node-icon">{step.icon}</span>
                      </motion.button>
@@ -283,6 +290,88 @@ const CourseDashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* ── Trivia Mini-Game Modal ── */}
+        <AnimatePresence>
+          {activeTrivia && (
+            <motion.div 
+              className="cdb-trivia-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div 
+                className="cdb-trivia-modal"
+                initial={{ y: 50, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 20, opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="cdb-trivia-header">
+                  <div className="cdb-trivia-header-left">
+                    <span className="cdb-trivia-icon">{activeTrivia.icon}</span>
+                    <h3 className="cdb-trivia-title">{activeTrivia.title}</h3>
+                  </div>
+                  <button className="cdb-modal-x" onClick={() => setActiveTrivia(null)}>✕</button>
+                </div>
+                
+                <div className="cdb-trivia-theory">
+                  <h4>📘 Concepto Clave</h4>
+                  <p>{activeTrivia.theory}</p>
+                </div>
+
+                <div className="cdb-trivia-game">
+                  <h4>💡 Desafío de Práctica</h4>
+                  <p className="cdb-trivia-question">{activeTrivia.question}</p>
+                  
+                  <div className="cdb-trivia-options">
+                    {activeTrivia.options.map((opt, idx) => {
+                      let btnClass = "cdb-trivia-btn";
+                      if (triviaState !== 'idle') {
+                        if (idx === activeTrivia.correctIndex) btnClass += " correct";
+                        else btnClass += " disabled";
+                      }
+                      return (
+                        <button 
+                          key={idx} 
+                          className={btnClass}
+                          disabled={triviaState !== 'idle'}
+                          onClick={() => {
+                             if (idx === activeTrivia.correctIndex) {
+                               setTriviaState('success');
+                               setTimeout(() => {
+                                 handleComplete(activeTrivia.id);
+                                 setActiveTrivia(null);
+                               }, 1500);
+                             } else {
+                               setTriviaState('error');
+                               setTimeout(() => setTriviaState('idle'), 1000);
+                             }
+                          }}
+                        >
+                          <span className="cdb-opt-letter">{['A','B','C','D'][idx]}</span>
+                          <span className="cdb-opt-text">{opt}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  {triviaState === 'error' && (
+                    <motion.div className="cdb-trivia-feedback error" initial={{scale:0.8}} animate={{scale:1}}>
+                      ❌ Respuesta incorrecta, ¡vuelve a intentarlo!
+                    </motion.div>
+                  )}
+                  {triviaState === 'success' && (
+                    <motion.div className="cdb-trivia-feedback success" initial={{scale:0.8}} animate={{scale:1}}>
+                      ✨ ¡Correcto! +{activeTrivia.xp} XP
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </div>
     );
   }

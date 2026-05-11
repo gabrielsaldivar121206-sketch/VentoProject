@@ -99,6 +99,87 @@ const SUB_TEMPLATES = [
   { p: "Maestría en", i: "🏆", ds: "Evaluación final" },
 ];
 
+const COURSE_CONTEXTS = {
+  english: {
+    actions: ["traducir mentalmente", "pronunciar con claridad", "escribir sin errores", "escuchar nativos", "estructurar frases"],
+    concepts: ["la gramática básica", "el vocabulario clave", "la fluidez conversacional", "la comprensión auditiva", "los falsos amigos"],
+    wrongOpts: ["Traducir palabra por palabra literalmente", "Ignorar las reglas gramaticales", "Hablar sin pensar en el contexto", "Usar siempre el traductor automático"]
+  },
+  chess: {
+    actions: ["calcular variantes", "posicionar las piezas", "atacar debilidades", "defender al rey", "controlar el centro"],
+    concepts: ["la estructura de peones", "la seguridad del rey", "el desarrollo rápido", "el valor de las piezas", "la profilaxis"],
+    wrongOpts: ["Mover la reina en la primera jugada", "Regalar piezas sin pensar", "Ignorar las amenazas del rival", "Jugar al azar sin plan"]
+  },
+  music: {
+    actions: ["afinar el instrumento", "leer a primera vista", "mantener el tempo", "interpretar con emoción", "reconocer intervalos"],
+    concepts: ["el ritmo constante", "la armonía correcta", "la melodía principal", "la afinación exacta", "la dinámica musical"],
+    wrongOpts: ["Tocar ignorando el metrónomo", "Tocar fuera de tono", "No prestar atención a la partitura", "Tocar sin ningún tipo de sentimiento"]
+  },
+  signlanguage: {
+    actions: ["gesticular con precisión", "usar el espacio", "posicionar las manos", "mirar al interlocutor", "enlazar señas"],
+    concepts: ["la expresión facial", "la direccionalidad", "la velocidad adecuada", "la claridad del gesto", "el contacto visual"],
+    wrongOpts: ["Mantener el rostro totalmente inexpresivo", "Hacer señas demasiado rápido y borrosas", "Dar la espalda mientras hablas", "Inventar señas desconocidas"]
+  },
+  math: {
+    actions: ["calcular mentalmente", "despejar la incógnita", "simplificar fracciones", "demostrar la ecuación", "verificar el resultado"],
+    concepts: ["el orden de operaciones", "la lógica matemática", "las fórmulas correctas", "la verificación de pasos", "el razonamiento abstracto"],
+    wrongOpts: ["Adivinar el número final", "Saltarse el orden de operaciones", "Dividir entre cero", "Copiar sin entender el proceso"]
+  }
+};
+
+function generateDynamicContent(courseId, topicName, subIndex, st) {
+  const ctx = COURSE_CONTEXTS[courseId] || COURSE_CONTEXTS.english;
+  
+  const action = ctx.actions[subIndex % ctx.actions.length];
+  const concept = ctx.concepts[subIndex % ctx.concepts.length];
+  const wrong1 = ctx.wrongOpts[(subIndex) % ctx.wrongOpts.length];
+  const wrong2 = ctx.wrongOpts[(subIndex + 1) % ctx.wrongOpts.length];
+  const wrong3 = ctx.wrongOpts[(subIndex + 2) % ctx.wrongOpts.length];
+  
+  let theory = "";
+  let question = "";
+  let correctOpt = "";
+
+  switch(subIndex % 5) {
+    case 0:
+      theory = `En el módulo "${topicName}", lo primero es aprender a ${action}. Esto fortalecerá de inmediato tu dominio sobre ${concept}. La repetición constante en este paso es la clave del éxito.`;
+      question = `¿Cuál es el primer objetivo fundamental al estudiar "${topicName}"?`;
+      correctOpt = `Aprender a ${action} para dominar ${concept}`;
+      break;
+    case 1:
+      theory = `Un error muy común al aplicar "${topicName}" es descuidar ${concept}. Si te enfocas y logras ${action} correctamente, evitarás confusiones y mejorarás radicalmente tu nivel.`;
+      question = `¿Qué elemento vital no debes descuidar al poner en práctica "${topicName}"?`;
+      correctOpt = `Debo enfocarme siempre en ${concept}`;
+      break;
+    case 2:
+      theory = `Para alcanzar el nivel experto en "${topicName}", debes integrar ${concept} en tu práctica. Esto te permitirá ${action} de forma natural, sin tener que pensar cada paso.`;
+      question = `¿Qué beneficio directo obtendrás al dominar completamente "${topicName}"?`;
+      correctOpt = `Poder ${action} de forma rápida y natural`;
+      break;
+    case 3:
+      theory = `El secreto mejor guardado de "${topicName}" es la increíble conexión que existe entre ${concept} y tu capacidad de ${action}. Dominar uno facilita enormemente el otro.`;
+      question = `¿Qué habilidades van estrechamente unidas cuando estudias "${topicName}"?`;
+      correctOpt = `El dominio de ${concept} y la habilidad de ${action}`;
+      break;
+    case 4:
+      theory = `Es hora de evaluar tu progreso en "${topicName}". Analiza honestamente tu fluidez para ${action}. Si aún dudas, significa que debes repasar y consolidar ${concept}.`;
+      question = `¿Cuál es la mejor manera de evaluar si realmente dominas "${topicName}"?`;
+      correctOpt = `Analizando mi confianza al ${action}`;
+      break;
+  }
+
+  let options = [correctOpt, wrong1, wrong2, wrong3];
+  const correctIndex = (subIndex * 7) % 4; // pseudo-random distribution
+  
+  if (correctIndex !== 0) {
+    const temp = options[correctIndex];
+    options[correctIndex] = options[0];
+    options[0] = temp;
+  }
+
+  return { theory, question, options, correctIndex };
+}
+
 export const LESSONS = {};
 
 // Programmatically generate exactly 10 subLessons per lesson
@@ -112,15 +193,24 @@ for (const [courseId, levelsData] of Object.entries(TOPICS)) {
         icon: topic.i,
         title: topic.t,
         desc: `Domina el área de ${topic.t.toLowerCase()}`,
-        xp: 150, // overall XP value, but now subLessons will carry weight
+        xp: 150, 
         content: `<h3>${topic.t}</h3><p>Este es el módulo central donde aprenderás todos los secretos sobre ${topic.t.toLowerCase()}.</p>`,
-        subLessons: SUB_TEMPLATES.map((st, sIndex) => ({
-          id: `${lessonId}-sub${sIndex}`,
-          icon: st.i,
-          title: `${st.p} ${topic.t}`,
-          desc: st.ds,
-          xp: 15 // 15 XP per mini lesson
-        }))
+        subLessons: SUB_TEMPLATES.map((st, sIndex) => {
+          
+          const { theory, question, options, correctIndex } = generateDynamicContent(courseId, topic.t, sIndex, st);
+
+          return {
+            id: `${lessonId}-sub${sIndex}`,
+            icon: st.i,
+            title: `${st.p} ${topic.t}`,
+            desc: st.ds,
+            xp: 15,
+            theory,
+            question,
+            options,
+            correctIndex
+          };
+        })
       };
     });
   }
