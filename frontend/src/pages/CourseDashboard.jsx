@@ -199,23 +199,26 @@ const CourseDashboard = () => {
   const uCourse = uCourses.find(c=>c.courseId===activeId);
   const level = LEVELS[uCourse?.level] || LEVELS.beginner;
   const lessons = LESSONS[activeId]?.[uCourse?.level] || [];
-  const pct = lessons.length > 0 ? Math.round((completedLessons.filter(id=>lessons.some(l=>l.id===id)).length / lessons.length)*100) : 0;
+  const pct = lessons.length > 0 ? Math.round((lessons.filter(l => {
+    const subs = l.subLessons || [];
+    return subs.length > 0 ? subs.every(sl => completedLessons.includes(sl.id)) : completedLessons.includes(l.id);
+  }).length / lessons.length)*100) : 0;
 
   const handleSwitch = (id) => { setActive(email,id); setActiveId(id); };
   const handleAdd = (id,lv) => { addCourse(email,id,lv); setUCourses(getUserCourses(email)); setActiveId(id); };
-  const handleComplete = (lid) => { const c = markCompleted(email,activeId,lid); setCompletedLessons(c); setOpenLesson(null); setDetectorLesson(null); };
+  const handleComplete = (lid) => { 
+    const c = markCompleted(email,activeId,lid); 
+    setCompletedLessons(c); 
+    // Do not close the modal, let them stay in the winding path
+  };
 
   const firstName = user?.name?.split(' ')[0] || 'Estudiante';
   if (!course) return null;
 
   // ── Lesson Detail View ──
   if (openLesson) {
-    // Generate dummy sub-lessons based on the active course
-    const subLessons = [
-      { id: 'theory', title: 'Teoría', desc: 'Aprende los conceptos básicos', icon: '📚' },
-      { id: 'practice', title: 'Práctica', desc: 'Aplica lo aprendido', icon: activeId==='music'?'🎵':activeId==='math'?'🧮':activeId==='chess'?'♟️':'🧠' },
-      { id: 'quiz', title: 'Quiz Final', desc: 'Demuestra tu conocimiento', icon: '🏆' },
-    ];
+    // Use the explicitly defined subLessons from courseData.js
+    const subLessons = openLesson.subLessons || [];
     
     return (
       <div className="cdb-root" style={{'--cc':course.color}}>
@@ -223,34 +226,60 @@ const CourseDashboard = () => {
         <div className="cdb-main">
           <div className="cdb-lesson-view-container">
             <div className="cdb-lesson-view-header-rich">
-              <h2 className="cdb-lesson-view-title">{openLesson.icon} {openLesson.title}</h2>
+              <h2 className="cdb-lesson-view-title">
+                <span className="cdb-lesson-view-title-icon">{openLesson.icon}</span> 
+                {openLesson.title}
+              </h2>
               <button className="cdb-lesson-back" onClick={()=>setOpenLesson(null)}>← Volver</button>
             </div>
             
-            {/* The Winding Path inside the lesson view */}
-            <div className="cdb-roadmap-path" style={{ marginTop: '2rem' }}>
+            {/* Winding Dotted Path */}
+            <div className="cdb-winding-path" style={{ marginTop: '2rem', paddingBottom: '5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6.5rem' }}>
               {subLessons.map((step, i) => {
-                 const isMobile = window.innerWidth <= 650;
-                 const offset = isMobile ? 0 : Math.sin(i * 1.5) * 100;
+                 const isDone = completedLessons.includes(step.id);
+                 const offset = Math.sin(i * 0.9) * 80;
+                 
                  return (
-                   <div className="cdb-node-wrapper" key={step.id} style={{ '--offset': `${offset}px` }}>
-                     {i > 0 && <svg className="cdb-path-line" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M50,0 Q50,50 50,100" vectorEffect="non-scaling-stroke" /></svg>}
-                     <motion.button className="cdb-lesson-node" whileHover={{scale:1.08}} whileTap={{scale:0.92}}>
+                   <div className="cdb-winding-node-wrapper" key={step.id} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', transform: `translateX(${offset}px)`, zIndex: i }}>
+                     
+                     {/* Dotted SVG Connection to previous node */}
+                     {i > 0 && (() => {
+                         const prevOffset = Math.sin((i - 1) * 0.9) * 80;
+                         const diffX = prevOffset - offset;
+                         return (
+                           <svg style={{ position: 'absolute', top: '-6.5rem', left: '50%', width: '300px', height: '6.5rem', transform: 'translateX(-50%)', zIndex: -1, pointerEvents: 'none', overflow: 'visible' }}>
+                              <path 
+                                d={`M ${150 + diffX} 0 C ${150 + diffX} 50, 150 50, 150 104`}
+                                stroke={isDone ? '#a855f7' : 'rgba(255,255,255,0.15)'}
+                                strokeWidth="6"
+                                strokeDasharray="10 12"
+                                strokeLinecap="round"
+                                fill="none"
+                              />
+                           </svg>
+                         );
+                     })()}
+
+                     {/* 3D Node Button */}
+                     <motion.button 
+                        className={`cdb-lesson-node ${isDone ? 'completed' : ''}`}
+                        whileHover={{scale:1.15, rotate: isDone ? 0 : 5}} 
+                        whileTap={{scale:0.85}}
+                        onClick={() => handleComplete(step.id)}
+                     >
                         <span className="cdb-node-icon">{step.icon}</span>
-                        <div className="cdb-node-tooltip">
-                          <strong>{step.title}</strong>
-                          <span>{step.desc}</span>
-                        </div>
                      </motion.button>
+                     
+                     {/* Clean Label Pill */}
+                     <div className="cdb-winding-label" style={{ borderColor: isDone ? '#a855f7' : 'var(--card-border)' }}>
+                       <div className="cdb-winding-title" style={{ color: isDone ? '#a855f7' : 'var(--text)' }}>{step.title}</div>
+                       <div className="cdb-winding-action" style={{ color: isDone ? '#a855f7' : 'var(--text2)' }}>
+                         {isDone ? '✨ Completado' : `Haz clic para +${step.xp} XP`}
+                       </div>
+                     </div>
                    </div>
                  );
               })}
-            </div>
-
-            <div style={{marginTop:'2rem',textAlign:'center'}}>
-              <button className="cdb-confirm-btn" style={{maxWidth:'300px'}} onClick={()=>handleComplete(openLesson.id)}>
-                ✓ Completar lección (+{openLesson.xp} XP)
-              </button>
             </div>
           </div>
         </div>
@@ -380,11 +409,15 @@ const CourseDashboard = () => {
         <h2 className="cdb-section-title">📖 Lecciones — {level.name}</h2>
         <div className="cdb-roadmap">
           {lessons.map((l,i) => {
-            const done = completedLessons.includes(l.id);
+            const subLessons = l.subLessons || [];
+            const completedCount = subLessons.filter(sl => completedLessons.includes(sl.id)).length;
+            const isFullyDone = subLessons.length > 0 ? completedCount === subLessons.length : completedLessons.includes(l.id);
+            const progressPercent = subLessons.length > 0 ? Math.round((completedCount / subLessons.length) * 100) : (isFullyDone ? 100 : 0);
+
             return (
               <motion.div
                 key={l.id}
-                className={`cdb-lesson-card ${done?'completed':''}`}
+                className={`cdb-lesson-card ${isFullyDone?'completed':''}`}
                 initial={{opacity:0,y:30,scale:0.9}}
                 animate={{opacity:1,y:0,scale:1}}
                 transition={{delay:0.08+i*0.07,type:'spring',stiffness:260,damping:20}}
@@ -394,9 +427,7 @@ const CourseDashboard = () => {
                   else setOpenLesson(l);
                 }}
               >
-                <span className="cdb-lesson-status">{done ? '✨' : ''}</span>
-                {/* 3D Circular Node inside the Card */}
-                <div className={`cdb-card-3d-node ${done?'completed':''}`}>
+                <div className={`cdb-card-3d-node ${isFullyDone?'completed':''}`}>
                   <span className="cdb-node-icon">{l.icon}</span>
                 </div>
                 
@@ -407,9 +438,9 @@ const CourseDashboard = () => {
                 
                 <div className="cdb-card-progress-wrap">
                   <div className="cdb-card-progress-bar">
-                    <div className="cdb-card-progress-fill" style={{ width: done ? '100%' : '0%' }}></div>
+                    <div className="cdb-card-progress-fill" style={{ width: `${progressPercent}%` }}></div>
                   </div>
-                  <span className="cdb-card-progress-text">{done ? '100%' : '0%'}</span>
+                  <span className="cdb-card-progress-text">{progressPercent}%</span>
                 </div>
               </motion.div>
             );
