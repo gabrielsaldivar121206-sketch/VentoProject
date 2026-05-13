@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDetector } from '../hooks/useDetector.js';
 import { LETRA_ES } from '../detectorLogica.js';
 import { COURSES, LEVELS, LESSONS } from './courseData';
+import PianoLessonModal from '../components/PianoLessonModal/PianoLessonModal';
 import './CourseDashboard.css';
 
 // ── Sign Language guide data ──
@@ -268,10 +269,8 @@ const CourseDashboard = () => {
                         whileHover={{scale:1.15, rotate: isDone ? 0 : 5}} 
                         whileTap={{scale:0.85}}
                         onClick={() => {
-                          if (!isDone) {
-                            setActiveTrivia(step);
-                            setTriviaState('idle');
-                          }
+                          setActiveTrivia(step);
+                          setTriviaState('idle');
                         }}
                      >
                         <span className="cdb-node-icon">{step.icon}</span>
@@ -291,9 +290,16 @@ const CourseDashboard = () => {
           </div>
         </div>
 
-        {/* ── Trivia Mini-Game Modal ── */}
+        {/* ── Trivia / Piano Lesson Modal ── */}
         <AnimatePresence>
           {activeTrivia && (
+            activeId === 'music' && activeTrivia.exerciseType ? (
+              <PianoLessonModal
+                lesson={activeTrivia}
+                onComplete={(lid) => { handleComplete(lid); }}
+                onClose={() => setActiveTrivia(null)}
+              />
+            ) : (
             <motion.div 
               className="cdb-trivia-overlay"
               initial={{ opacity: 0 }}
@@ -369,6 +375,7 @@ const CourseDashboard = () => {
                 </div>
               </motion.div>
             </motion.div>
+            )
           )}
         </AnimatePresence>
 

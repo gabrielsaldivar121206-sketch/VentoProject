@@ -1,4 +1,5 @@
 // courseData.js — Programmatic generation of 10 lessons per level, and 10 sub-lessons per lesson
+import { generateMusicSubLessons } from './musicSyllabusData';
 export const COURSES = {
   english:      { id:'english',      name:'Inglés',      emoji:'🇺🇸', color:'#3b82f6', desc:'Domina el idioma más hablado del mundo.' },
   chess:        { id:'chess',        name:'Ajedrez',     emoji:'♟️',  color:'#f59e0b', desc:'Desarrolla tu pensamiento estratégico.' },
@@ -44,16 +45,16 @@ const TOPICS = {
   },
   music: {
     beginner: [
-      { t: "Las Notas", i: "🎵" }, { t: "El Pentagrama", i: "📋" }, { t: "Clave de Sol", i: "🎼" }, { t: "Clave de Fa", i: "🎼" }, { t: "Figuras Rítmicas", i: "⏱️" },
-      { t: "Teclado Básico", i: "🎹" }, { t: "Alteraciones (# y b)", i: "🔣" }, { t: "Silencios", i: "🤫" }, { t: "Ligaduras", i: "🔗" }, { t: "Compás de 4/4", i: "⏲️" }
+      { t: "Naturaleza del Sonido", i: "🔊" }, { t: "El Teclado y el Pentagrama", i: "🎹" }, { t: "Figuras Rítmicas I", i: "⏱️" }, { t: "Clave de Sol", i: "🎼" }, { t: "Compases Simples", i: "⏲️" },
+      { t: "Alteraciones I", i: "🔣" }, { t: "Dinámicas Básicas", i: "🔉" }, { t: "Técnica de Dedos", i: "🖐️" }, { t: "Intervalos de 2da y 3ra", i: "↔️" }, { t: "Primera Melodía", i: "🎵" }
     ],
     intermediate: [
-      { t: "Escalas Mayores", i: "📏" }, { t: "Escalas Menores", i: "🔽" }, { t: "Tríadas", i: "🔼" }, { t: "Inversiones", i: "🏗️" }, { t: "Arpegios", i: "🎹" },
-      { t: "Armaduras", i: "🛡️" }, { t: "Lectura Dinámica", i: "👁️" }, { t: "Sincopas", i: "⚡" }, { t: "Tresillos", i: "🕒" }, { t: "Intervalos", i: "↔️" }
+      { t: "Escalas Mayores", i: "📏" }, { t: "Escalas Menores", i: "🔽" }, { t: "Intervalos Compuestos", i: "↕️" }, { t: "Formación de Tríadas", i: "🔺" }, { t: "Clave de Fa", i: "🎼" },
+      { t: "Inversiones de Acordes", i: "🔄" }, { t: "Círculo de Quintas", i: "⭕" }, { t: "Ritmo Avanzado", i: "🥁" }, { t: "Arpegios Básicos", i: "🎹" }, { t: "Acompañamiento", i: "🤲" }
     ],
     advanced: [
-      { t: "Armonía Funcional", i: "🎭" }, { t: "Modulación", i: "🌉" }, { t: "Acordes de Séptima", i: "🎷" }, { t: "Contrapunto", i: "✍️" }, { t: "Modos Griegos", i: "🏛️" },
-      { t: "Composición", i: "💡" }, { t: "Producción Musical", i: "💻" }, { t: "Mezcla y Paneo", i: "🎚️" }, { t: "Orquestación", i: "🎻" }, { t: "Jazz y Sustituciones", i: "🎷" }
+      { t: "Acordes de Séptima", i: "🎷" }, { t: "Armonía Funcional", i: "🎭" }, { t: "Modos Griegos", i: "🏛️" }, { t: "Extensiones de Acordes", i: "✨" }, { t: "Modulación", i: "🌉" },
+      { t: "Improvisación I", i: "🎤" }, { t: "Síncopas y Contratiempos", i: "⚡" }, { t: "Análisis Musical", i: "🔍" }, { t: "Composición y Estructura", i: "💡" }, { t: "Producción Básica", i: "💻" }
     ]
   },
   signlanguage: {
@@ -195,22 +196,22 @@ for (const [courseId, levelsData] of Object.entries(TOPICS)) {
         desc: `Domina el área de ${topic.t.toLowerCase()}`,
         xp: 150, 
         content: `<h3>${topic.t}</h3><p>Este es el módulo central donde aprenderás todos los secretos sobre ${topic.t.toLowerCase()}.</p>`,
-        subLessons: SUB_TEMPLATES.map((st, sIndex) => {
-          
-          const { theory, question, options, correctIndex } = generateDynamicContent(courseId, topic.t, sIndex, st);
-
-          return {
-            id: `${lessonId}-sub${sIndex}`,
-            icon: st.i,
-            title: `${st.p} ${topic.t}`,
-            desc: st.ds,
-            xp: 15,
-            theory,
-            question,
-            options,
-            correctIndex
-          };
-        })
+        subLessons: courseId === 'music'
+          ? generateMusicSubLessons(lessonId, levelId, index)
+          : SUB_TEMPLATES.map((st, sIndex) => {
+              const { theory, question, options, correctIndex } = generateDynamicContent(courseId, topic.t, sIndex, st);
+              return {
+                id: `${lessonId}-sub${sIndex}`,
+                icon: st.i,
+                title: `${st.p} ${topic.t}`,
+                desc: st.ds,
+                xp: 15,
+                theory,
+                question,
+                options,
+                correctIndex
+              };
+            })
       };
     });
   }
